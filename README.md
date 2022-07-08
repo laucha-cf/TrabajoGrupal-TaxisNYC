@@ -28,6 +28,9 @@ Para poder entender mejor los datos, podemos proveer lo siguiente
 * De donde sacamos la data de los viajes --> https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
 * Archivo de zonas de NYC --> taxi+_zone_lookup.csv
 
+Plus
+* Fuente de datos del clima por Borough --> https://www.visualcrossing.com/weather-data
+
 Borougs y sus LAT Y LONG<br>
 * Manhattan, New York City, NY, USA (40.776676, -73.971321)
 * Brooklyn, New York City, NY, USA (40.650002, -73.949997)

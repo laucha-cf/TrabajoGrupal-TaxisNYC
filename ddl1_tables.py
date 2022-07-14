@@ -1,4 +1,6 @@
 # -- Librerías usadas -- #
+import os
+
 from sqlalchemy import create_engine, Column, Integer, DECIMAL, String, Date, Time
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -6,11 +8,11 @@ from sqlalchemy_utils import database_exists, create_database
 
 #  -- CONSTANTES -- #
 DBMS = 'postgresql'
-USER = 'postgres'
-PASSWORD = '4217796'
-HOST = 'localhost'
+USER = os.environ.get('DB_USER')
+PASSWORD = os.environ.get('DB_PASSWORD')
+HOST = os.environ.get('DB_ENDPOINT')
 PORT = '5432'
-DB_NAME = 'nyc_taxis'
+DB_NAME = os.environ.get('DB_NAME')
 
 # -- Creación del engine y de la db -- #
 engine = create_engine(f'{DBMS}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}')

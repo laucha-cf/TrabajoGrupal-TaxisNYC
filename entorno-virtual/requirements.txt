@@ -83,6 +83,7 @@ progressbar2==4.0.0
 prometheus-client==0.14.1
 prompt-toolkit==3.0.30
 psutil==5.9.1
+psycopg2==2.9.3
 pure-eval==0.2.2
 pyarrow==7.0.0
 pycparser==2.21

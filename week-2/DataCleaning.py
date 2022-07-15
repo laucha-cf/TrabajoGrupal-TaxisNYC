@@ -131,4 +131,5 @@ df1.loc[ ((df1['PULocationID']==265) & (df1['DOLocationID']==265)), 'Outlier' ] 
 
 df_outliers = df1.loc[ df1['Outlier']==1 ]
 
-df_outliers
+df_outliers.to_csv('../processed_data/outliers.csv')
+df1.to_csv('../processed_data/data_taxis_nyc.csv')

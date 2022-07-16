@@ -1,5 +1,7 @@
-import pandas as pd
+import csv
+from io import StringIO
 
+import pandas as pd
 from sqlalchemy import create_engine, inspect, MetaData, Table
 
 # crea la conexión a la base de datos, primero crea un engine que es basicamente una instancia de la base de datos
@@ -15,7 +17,6 @@ insp = inspect(engine)
 print(insp.get_table_names())
 
 # Asignamos a una variable la tabla leída a través de sqlalchemy par poder manipularla
-
 Trip = Table('Trip', metadata, autoload=True, autoload_with=engine)
 Payment = Table('Payment', metadata, autoload=True, autoload_with=engine)
 Vendor = Table('Vendor', metadata, autoload=True, autoload_with=engine)
@@ -28,7 +29,7 @@ Calendar = Table('Calendar', metadata, autoload=True, autoload_with=engine)
 Zone = Table('Zone', metadata, autoload=True, autoload_with=engine)
 
 # Se levantan los dataframes correspondientes a cada tabla
-Trip_df = pd.read_csv('./tables/trip.csv')
+Trip_df = pd.read_csv('./tables/trip.csv', dtype={'Duration': int})
 Payment_df = pd.read_csv('./tables/payment.csv')
 Vendor_df = pd.read_csv('./tables/vendor.csv')
 Borough_df = pd.read_csv('./tables/borough.csv')
@@ -47,10 +48,31 @@ Zone_df.to_sql('Zone', engine, if_exists='append', index=False, method='multi')
 Vendor_df.to_sql('Vendor', engine, if_exists='append', index=False, method='multi')
 Calendar_df.to_sql('Calendar', engine, if_exists='append', index=False, method='multi')
 Precip_Type_df.to_sql('Precip_Type', engine, if_exists='append', index=False, method='multi')
-Trip_df.to_sql('Trip', engine, if_exists='append', index=False, method='multi', chunksize=50000)
 Rate_Code_df.to_sql('Rate_Code', engine, if_exists='append', index=False, method='multi')
 Payment_Type_df.to_sql('Payment_Type', engine, if_exists='append', index=False, method='multi')
-Payment_df.to_sql('Payment', engine, if_exists='append', index=False, method='multi', chunksize=50000)
 
-# Cerramos la conexion
-connection.close()
+
+# Función para optimizar la carga de tablas grandes
+def psql_insert_copy(table, conn, keys, data_iter):
+    dbapi_conn = conn.connection
+    with dbapi_conn.cursor() as cur:
+        s_buf = StringIO()
+        writer = csv.writer(s_buf)
+        writer.writerows(data_iter)
+        s_buf.seek(0)
+
+        columns = ', '.join(['"{}"'.format(k) for k in keys])
+        if table.schema:
+            table_name = '{}."{}"'.format(table.schema, table.name)
+        else:
+            table_name = table.name
+
+        sql = 'COPY "{}" ({}) FROM STDIN WITH CSV'.format(
+            table_name, columns)
+        cur.copy_expert(sql=sql, file=s_buf)
+
+
+Trip_df.loc[(Trip_df['IdPrecip_Type'].isna()), 'IdPrecip_Type'] = 0
+Trip_df.IdPrecip_Type = [*map(round, Trip_df.IdPrecip_Type)]
+Trip_df.to_sql('Trip', engine, if_exists='append', index=False, method=psql_insert_copy)
+Payment_df.to_sql('Payment', engine, if_exists='append', index=False, method=psql_insert_copy)

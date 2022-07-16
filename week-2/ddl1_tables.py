@@ -22,14 +22,16 @@ if not database_exists(engine.url):
 Session = sessionmaker(bind=engine)
 session = Session()
 
-Base = declarative_base() #  Usada para declarar y crear las tablas
+Base = declarative_base()  # Usada para declarar y crear las tablas
+
 
 # -- Declaración de tablas -- #
-class Service_Zone(Base):
+class ServiceZone(Base):
     __tablename__ = 'Service_Zone'
     IdService_Zone = Column(Integer, primary_key=True)
     Service_Zone = Column(String(50))
     zones = relationship('Zone')
+
 
 class Borough(Base):
     __tablename__ = 'Borough'
@@ -66,7 +68,7 @@ class Calendar(Base):
     trips = relationship('Trip')
 
 
-class Precip_Type(Base):
+class PrecipType(Base):
     __tablename__ = 'Precip_Type'
     IdPrecip_Type = Column(Integer, primary_key=True)
     Precip_Type = Column(String(50))
@@ -81,22 +83,22 @@ class Trip(Base):
     PU_Time = Column(Time)
     Duration = Column(Integer)
     Passenger_Count = Column(Integer)
-    Distance = Column(DECIMAL(5,2))
+    Distance = Column(DECIMAL(5, 2))
     PU_IdZone = Column(Integer, ForeignKey('Zone.IdZone'))
     DO_IdZone = Column(Integer, ForeignKey('Zone.IdZone'))
-    Temperature = Column(DECIMAL(4,2))
+    Temperature = Column(DECIMAL(4, 2))
     IdPrecip_Type = Column(Integer, ForeignKey('Precip_Type.IdPrecip_Type'))
     payments = relationship('Payment', uselist=False)
 
 
-class Rate_Code(Base):
+class RateCode(Base):
     __tablename__ = 'Rate_Code'
     IdRate_Code = Column(Integer, primary_key=True)
     Rate_Code = Column(String(50))
     payments = relationship('Payment')
 
 
-class Payment_Type(Base):
+class PaymentType(Base):
     __tablename__ = 'Payment_Type'
     IdPayment_Type = Column(Integer, primary_key=True)
     Payment_Type = Column(String(50))
@@ -105,18 +107,18 @@ class Payment_Type(Base):
 
 class Payment(Base):
     __tablename__ = 'Payment'
-
     IdPayment = Column(Integer, primary_key=True)
     IdTrip = Column(Integer, ForeignKey('Trip.IdTrip'))
     IdRate_Code = Column(Integer, ForeignKey('Rate_Code.IdRate_Code'))
     IdPayment_Type = Column(Integer, ForeignKey('Payment_Type.IdPayment_Type'))
-    Fare_Amount = Column(DECIMAL(6,2))
-    Extra = Column(DECIMAL(4,2))
-    MTA_Tax = Column(DECIMAL(4,2))
-    Improvement_Surcharge = Column(DECIMAL(4,2))
-    Tolls_Amount = Column(DECIMAL(5,2))
-    Total_Amount = Column(DECIMAL(6,2))
+    Fare_Amount = Column(DECIMAL(6, 2))
+    Extra = Column(DECIMAL(4, 2))
+    MTA_Tax = Column(DECIMAL(4, 2))
+    Improvement_Surcharge = Column(DECIMAL(4, 2))
+    Tolls_Amount = Column(DECIMAL(5, 2))
+    Total_Amount = Column(DECIMAL(6, 2))
     trips = relationship('Trip')
+
 
 # -- Creación de tablas en la DB -- #
 Base.metadata.create_all(engine)

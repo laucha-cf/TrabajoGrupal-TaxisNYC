@@ -23,10 +23,17 @@ Algunas de las métricas sugeridas son:
 * Viajes entre distintas Zonas		
 
 Para poder entender mejor los datos, podemos proveer lo siguiente
+* Que es un Borough?                     --> https://en.wikipedia.org/wiki/Boroughs_of_New_York_City
+* Archivo de zonas de NYC                --> taxi+_zone_lookup.csv
 
-* Que es un Borough? -->  https://en.wikipedia.org/wiki/Boroughs_of_New_York_City
-* De donde sacamos la data de los viajes --> https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
-* Archivo de zonas de NYC --> taxi+_zone_lookup.csv
+`Distribución tareas`
+* Gantt --> https://onedrive.live.com/view.aspx?resid=D585533C1D392E2E!3591&ithint=file%2cxlsx&authkey=!ADsnTEGqJC5Iw6s
+
+`Fuentes`
+* Data Yellow Cab TLC                    --> https://www1.nyc.gov/site/tlc/businesses/yellow-cab.page
+* Fuente de datos del clima por Borough  --> https://www.visualcrossing.com/weather-data
+* Emissions from the Taxi and For-Hire Vehicle Transportation Sector in New York City -->https://www1.nyc.gov/assets/dcas/downloads/pdf/fleet/Emissions-from-NYC-For-Hire-Vehicle-FHV-Industry.pdf
+* New York City Regular All Formulations Retail Gasoline Prices (Dollars per Gallon) -->https://www.eia.gov/dnav/pet/hist/LeafHandler.ashx?n=PET&s=EMM_EPMR_PTE_Y35NY_DPG&f=M
 
 Borougs y sus LAT Y LONG<br>
 * Manhattan, New York City, NY, USA (40.776676, -73.971321)

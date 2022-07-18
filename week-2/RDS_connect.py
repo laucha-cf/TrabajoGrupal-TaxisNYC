@@ -1,5 +1,4 @@
-import csv
-from io import StringIO
+import io
 
 import pandas as pd
 from sqlalchemy import create_engine, inspect, MetaData, Table
@@ -53,26 +52,18 @@ Payment_Type_df.to_sql('Payment_Type', engine, if_exists='append', index=False, 
 
 
 # Función para optimizar la carga de tablas grandes
-def psql_insert_copy(table, conn, keys, data_iter):
-    dbapi_conn = conn.connection
-    with dbapi_conn.cursor() as cur:
-        s_buf = StringIO()
-        writer = csv.writer(s_buf)
-        writer.writerows(data_iter)
-        s_buf.seek(0)
-
-        columns = ', '.join(['"{}"'.format(k) for k in keys])
-        if table.schema:
-            table_name = '{}."{}"'.format(table.schema, table.name)
-        else:
-            table_name = table.name
-
-        sql = 'COPY "{}" ({}) FROM STDIN WITH CSV'.format(
-            table_name, columns)
-        cur.copy_expert(sql=sql, file=s_buf)
+def sql_copy_opt(df, tablename, eng):
+    conn = eng.raw_connection()
+    cur = conn.cursor()
+    output = io.StringIO()
+    df.to_csv(output, sep='\t', header=False, index=False)
+    output.seek(0)
+    cur.copy_from(output, tablename, null="") # null values become ''
+    conn.commit()
+    cur.close()
 
 
 Trip_df.loc[(Trip_df['IdPrecip_Type'].isna()), 'IdPrecip_Type'] = 0
 Trip_df.IdPrecip_Type = [*map(round, Trip_df.IdPrecip_Type)]
-Trip_df.to_sql('Trip', engine, if_exists='append', index=False, method=psql_insert_copy)
-Payment_df.to_sql('Payment', engine, if_exists='append', index=False, method=psql_insert_copy)
+sql_copy_opt(Trip_df, 'Trip', engine)
+sql_copy_opt(Payment_df, 'Payment', engine)

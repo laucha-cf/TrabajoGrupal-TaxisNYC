@@ -3,14 +3,14 @@ import pandas as pd
 import numpy as np
 
 # -- Cargamos los datos de las zonas dentro de Nueva York --#
-df_all_zones = pd.read_csv('./data/taxi+_zone_lookup.csv')
+df_all_zones = pd.read_csv('../data/taxi+_zone_lookup.csv')
 # -- Cargamos los datos de los viajes en taxi. Datos previamente procesados --#
-df_all = pd.read_csv('./processed_data/data_taxis_nyc_2018.csv', parse_dates=['tpep_pickup_datetime'])
+df_all = pd.read_csv('../processed_data/data_taxis_nyc_2018.csv', parse_dates=['tpep_pickup_datetime'])
 # -- Creamos una copia del DataFrame para no afectar el original --#
 df = df_all.copy()
 
 # -- Cargamos los datos del clima para cada Borough --#
-df_weather = pd.read_csv('./data/NY_Boroughs_Weathers_01-2018.csv', parse_dates=['Datetime'])
+df_weather = pd.read_csv('../data/NY_Boroughs_Weathers_01-2018.csv', parse_dates=['Datetime'])
 
 # %%
 # -- Agregamos info del clima al DataFrame de viajes --#
@@ -172,13 +172,13 @@ df_payment = df_payment.rename(
                            'tolls_amount': 'Tolls_Amount', 'total_amount': 'Total_Amount'})
 # %%
 # -- Exportar a archivos CSV --#
-df_vendor.to_csv('./tables/vendor.csv', index=False)
-df_calendar.to_csv('./tables/calendar.csv', index=False)
-df_borough.to_csv('./tables/borough.csv', index=False)
-df_service_zone.to_csv('./tables/service_zone.csv', index=False)
-df_trip.to_csv('./tables/trip.csv', index=False)
-df_precip_type.to_csv('./tables/precip_type.csv', index=False)
-df_rate_code.to_csv('./tables/rate_code.csv', index=False)
-df_payment_type.to_csv('./tables/payment_type.csv', index=False)
-df_zone.to_csv('./tables/zone.csv', index=False)
-df_payment.to_csv('./tables/payment.csv', index=False)
+df_vendor.to_csv('../tables/vendor.csv', index=False)
+df_calendar.to_csv('../tables/calendar.csv', index=False)
+df_borough.to_csv('../tables/borough.csv', index=False)
+df_service_zone.to_csv('../tables/service_zone.csv', index=False)
+df_trip.to_csv('../tables/trip.csv', index=False)
+df_precip_type.to_csv('../tables/precip_type.csv', index=False)
+df_rate_code.to_csv('../tables/rate_code.csv', index=False)
+df_payment_type.to_csv('../tables/payment_type.csv', index=False)
+df_zone.to_csv('../tables/zone.csv', index=False)
+df_payment.to_csv('../tables/payment.csv', index=False)

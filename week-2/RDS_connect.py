@@ -8,7 +8,7 @@ from sqlalchemy import create_engine, inspect, MetaData, Table
 # cuando ya está instanciada se crea la conexión a la base de datos
 # metadata es un objeto que contiene toda la información correspondiente a los features de la base de datos
 
-engine = create_engine('postgresql+psycopg2://postgres:4217796@localhost:5432/test')
+engine = create_engine('postgresql+psycopg2://postgres:shakejunt02@localhost:5432/g9')
 connection = engine.connect()
 metadata = MetaData()
 

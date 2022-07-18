@@ -2,7 +2,7 @@ import pandas as pd
 import datetime as dt
 
 # Cargamos los datos
-df = pd.read_parquet('data/yellow_tripdata_2018-01.parquet')
+df = pd.read_parquet('../data/yellow_tripdata_2018-01.parquet')
 
 # Hacemos una copia para trabajar con los datos y para evitar que en un error afecte los datos originales
 df1 = df.copy()  
@@ -56,6 +56,8 @@ df1.query("trip_distance < @above", inplace=True)  # filtramos los outliers supe
 
 
 def impute_value(p_x):
+    '''Imputa 265 (Unknown) donde haya valores fuera de rango (1-265)
+    param: p_x int'''
     if 1 <= p_x <= 265:
         return p_x
     return 265
@@ -69,6 +71,9 @@ mode = df1['RatecodeID'].mode()[0]
 
 
 def impute_mode(p_x):
+    '''Imputa la moda donde haya valores fuera de rango (1-6)
+    param: p_x int
+    '''
     if p_x not in [*range(1, 7)]:
         return mode
     return p_x
@@ -84,6 +89,9 @@ df1 = df1.drop(columns=['store_and_fwd_flag'])
 
 
 def impute_type(p_x):
+    '''Imputa la moda donde haya valores fuera de rango (1-6)
+    param: p_x int
+    '''
     if p_x not in [*range(1, 7)]:
         return 5
     return p_x
@@ -99,6 +107,9 @@ mode_extra = df1['extra'].mode()[0]
 
 
 def impute_extra(p_x):
+    '''Imputa la moda donde haya valores fuera de rango (0, 0.5, 1)
+    param: p_x int
+    '''
     if p_x not in [0, 0.5, 1]:
         return mode_extra
     return p_x
@@ -107,9 +118,10 @@ def impute_extra(p_x):
 df1['extra'] = df1['extra'].apply(impute_extra)
 
 # - MTA_tax Sólo acepta valores de 0 y 0.5.*Decisión final: si el viaje no es outlier imputar
-
-
 def impute_mta(p_x):
+    '''Imputa el 0.5 en MTA_tax donde haya valores distintos de este
+    param: p_x Float
+    '''
     if p_x != 0.5:
         return 0.5
     return p_x
@@ -122,6 +134,9 @@ df1['mta_tax'] = df1.loc[(~df1['payment_type'].isin([3, 4])), 'mta_tax'].apply(i
 
 
 def impute_i_s(p_x):
+    '''Imputa el 0.3 en Improvement Surcharge donde haya valores distintos de este
+    param: p_x Float
+    '''
     if p_x != 0.3:
         return 0.3
     return p_x
@@ -143,5 +158,5 @@ df1.loc[((df1['PULocationID'] == 265) & (df1['DOLocationID'] == 265)), 'Outlier'
 
 df_outliers = df1.loc[df1['Outlier'] == 1]
 
-df_outliers.to_csv('./processed_data/outliers.csv')
-df1.to_csv('./processed_data/data_taxis_nyc_2018.csv', index=False)
+df_outliers.to_csv('../processed_data/outliers.csv')
+df1.to_csv('../processed_data/data_taxis_nyc_2018.csv', index=False)

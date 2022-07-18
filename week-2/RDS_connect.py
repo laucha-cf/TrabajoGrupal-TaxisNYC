@@ -3,6 +3,7 @@ import io
 import pandas as pd
 from sqlalchemy import create_engine, inspect, MetaData, Table
 import datetime as dt
+import time
 
 # crea la conexión a la base de datos, primero crea un engine que es basicamente una instancia de la base de datos
 # cuando ya está instanciada se crea la conexión a la base de datos
@@ -43,7 +44,7 @@ Zone_df = pd.read_csv('../tables/zone.csv')
 # Carga los contenidos de los dataframes en las tablas correspondientes en la DB, se recomienda ejecutar uno por uno.
 # Para las tablas con mayor número de registros se recomienda trabajar con el parametro chunksize
 dataframes = [Service_Zone_df, Borough_df, Zone_df, Vendor_df, Calendar_df, Precip_Type_df, Rate_Code_df, Payment_Type_df, Trip_df, Payment_df]
-tables_names = ['Service Zone', 'Borough', 'Zone', 'Vendor', 'Calendar', 'Precip Type', 'Rate Code', 'Payment Type', 'Trip', 'Payment']
+tables_names = ['Service_Zone', 'Borough', 'Zone', 'Vendor', 'Calendar', 'Precip_Type', 'Rate_Code', 'Payment_Type', 'Trip', 'Payment']
 df_times = pd.DataFrame({'tables': tables_names})
 start_tms = []
 end_tms = []
@@ -54,10 +55,10 @@ def fill_table( p_name, p_dataframe ):
     param: p_dataframe DataFrame ->DataFrame de Datos
     '''
     print(f'Insertando {p_name}...')
-    start = dt.datetime.now()
+    start = time.time()
     p_dataframe.to_sql(p_name, engine, if_exists='append', index=False, method='multi')
     start_tms.append(start)
-    end_tms.append(dt.datetime.now())
+    end_tms.append(time.time())
     
 # Función para optimizar la carga de tablas grandes
 def sql_copy_opt(df, tablename, eng):
@@ -83,18 +84,18 @@ def fill_Trip():
     Trip_df.loc[(Trip_df['IdPrecip_Type'].isna()), 'IdPrecip_Type'] = 0
     Trip_df.IdPrecip_Type = [*map(round, Trip_df.IdPrecip_Type)]
     print(f'Insertando Trip...')
-    start = dt.datetime.now()
+    start = time.time()
     sql_copy_opt(Trip_df, 'Trip', engine)
     start_tms.append(start)
-    end_tms.append(dt.datetime.now()) 
+    end_tms.append(time.time()) 
 def fill_Payment():
     '''Puebla la tabla Payment
     '''
     print('Insertando Payment...')
-    start = dt.datetime.now()
+    start = time.time()
     sql_copy_opt(Payment_df, 'Payment', engine)
     start_tms.append(start)
-    end_tms.append(dt.datetime.now()) 
+    end_tms.append(time.time()) 
 
 # Poblamos todas las tablas
 for i, name in enumerate(tables_names):

@@ -12,7 +12,7 @@ PASSWORD = 'shakejunt02'
 HOST = 'localhost'
 PORT = '5432'
 DB_NAME = 'g9'
-
+'postgresql://postgres:{PASSWORD}@localhost:5432/{DB_NAME}'
 # -- Creación del engine y de la db -- #
 engine = create_engine(f'{DBMS}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}')
 if not database_exists(engine.url):

@@ -112,6 +112,7 @@ six==1.16.0
 sniffio==1.2.0
 soupsieve==2.3.2.post1
 SQLAlchemy==1.4.39
+sqlalchemy-redshift==0.8.9
 SQLAlchemy-Utils==0.38.3
 stack-data==0.3.0
 tenacity==8.0.1

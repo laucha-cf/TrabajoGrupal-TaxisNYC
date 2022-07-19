@@ -18,15 +18,23 @@ for i in df1['VendorID']:
 
 # - tpep_pickup_datetime acepta registros entre 01-01-2018 y 31-01-2018 (23:59:59 hs), fuera de esto/NaT se imputa
 # por el último valor dentro del rango. *Decisión final: Fuera del rango se desestima
-min_date = dt.datetime(2018, 1, 1)  # establecemos la fecha minima
-max_date = dt.datetime(2018, 2, 1)  # establecemos la fecha maxima
+date = df.tpep_pickup_datetime.mode()[0]
+year = date.year
+month = date.month
+min_date = dt.datetime(year, month, 1)  # establecemos la fecha minima
+if month == 12:
+    year += 1
+    month = 1
+else:
+    month += 1
+max_date = dt.datetime(year, month, 1)  # establecemos la fecha maxima
 df1.query("tpep_pickup_datetime <= @max_date", inplace=True)  # filtramos
 df1.query("tpep_pickup_datetime >= @min_date", inplace=True)
 
 # - tpep_dropoff_datetime Acepta valores entre 01-01-2018 y 01-02-2018 (hasta el mediodía 12pm).
 # Si se pasa del rango, imputar con el último valor dentro del rango.
-min_date1 = dt.datetime(2018, 1, 1)  # establecemos la fecha minima
-max_date1 = dt.datetime(2018, 2, 1, 12)  # establecemos la fecha maxima (hasta el mediodia)
+min_date1 = min_date  # establecemos la fecha minima
+max_date1 = dt.datetime(year, month, 1, 12)  # establecemos la fecha maxima (hasta el mediodia)
 
 # - tpep_dropoff_datetime se desestima, se reemplaza por el campo 'Duración del viaje'.
 # Primero creamos la columna 'Travel_time'
@@ -51,13 +59,11 @@ above = df1['trip_distance'].mean() + 3 * df1['trip_distance'].std()
 
 df1.query("trip_distance < @above", inplace=True)  # filtramos los outliers superiores
 
+
 # - PU_Location y DO_location aceptan valores dentro del rango (1, 265)
 # Fuera de este rango se imputa por 265 (Unknown).
-
-
 def impute_value(p_x):
-    '''Imputa 265 (Unknown) donde haya valores fuera de rango (1-265)
-    param: p_x int'''
+    """Imputa por 265 (Unknown) donde haya valores fuera de rango (1-265)."""
     if 1 <= p_x <= 265:
         return p_x
     return 265
@@ -71,9 +77,7 @@ mode = df1['RatecodeID'].mode()[0]
 
 
 def impute_mode(p_x):
-    '''Imputa la moda donde haya valores fuera de rango (1-6)
-    param: p_x int
-    '''
+    """Imputa la moda donde haya valores fuera de rango (1-6)"""
     if p_x not in [*range(1, 7)]:
         return mode
     return p_x
@@ -85,13 +89,10 @@ df1['RatecodeID'] = df1['RatecodeID'].apply(impute_mode)
 # *Decisión final: Drop
 df1 = df1.drop(columns=['store_and_fwd_flag'])
 
+
 # - Payment_type acepta valores (1-6), fuera de este rango se imputa por 5 (Unknown).
-
-
 def impute_type(p_x):
-    '''Imputa la moda donde haya valores fuera de rango (1-6)
-    param: p_x int
-    '''
+    """Imputa la moda donde haya valores fuera de rango (1-6)"""
     if p_x not in [*range(1, 7)]:
         return 5
     return p_x
@@ -107,9 +108,7 @@ mode_extra = df1['extra'].mode()[0]
 
 
 def impute_extra(p_x):
-    '''Imputa la moda donde haya valores fuera de rango (0, 0.5, 1)
-    param: p_x int
-    '''
+    """Imputa la moda donde haya valores fuera de rango (0, 0.5, 1)"""
     if p_x not in [0, 0.5, 1]:
         return mode_extra
     return p_x
@@ -117,11 +116,10 @@ def impute_extra(p_x):
 
 df1['extra'] = df1['extra'].apply(impute_extra)
 
+
 # - MTA_tax Sólo acepta valores de 0 y 0.5.*Decisión final: si el viaje no es outlier imputar
 def impute_mta(p_x):
-    '''Imputa el 0.5 en MTA_tax donde haya valores distintos de este
-    param: p_x Float
-    '''
+    """Imputa a 0.5 en MTA_tax donde haya valores distintos de este."""
     if p_x != 0.5:
         return 0.5
     return p_x
@@ -129,14 +127,11 @@ def impute_mta(p_x):
 
 df1['mta_tax'] = df1.loc[(~df1['payment_type'].isin([3, 4])), 'mta_tax'].apply(impute_mta)
 
+
 # - Improvement_surcharge Sólo acepta valores de (0.3), si el viaje no es outlier imputar.
 # *Decisión final: imputar en todos los casos a 0.3
-
-
 def impute_i_s(p_x):
-    '''Imputa el 0.3 en Improvement Surcharge donde haya valores distintos de este
-    param: p_x Float
-    '''
+    """Imputa el 0.3 en Improvement Surcharge donde haya valores distintos de este."""
     if p_x != 0.3:
         return 0.3
     return p_x

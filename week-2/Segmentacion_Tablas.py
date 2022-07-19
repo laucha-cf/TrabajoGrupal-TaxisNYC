@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import requests
 import json
+import boto3
+from io import StringIO
 
 # -- Cargamos los datos de las zonas dentro de Nueva York --#
 df_all_zones = pd.read_csv('../data/taxi+_zone_lookup.csv')
@@ -65,15 +67,21 @@ df_zone.rename(columns={
 
 
 def replace_bor_for_index(p_x):
-    '''Retorna el índice correspondiente al Borough
-    param: p_x String ->Borough del cuál deseo saber el índice'''
+    """
+    Retorna el índice correspondiente al Borough.
+    :type p_x: str
+    :param p_x: Borough del cuál deseo saber el índice.
+    """
     for j, bor in enumerate(df_borough['Borough']):
         if bor == p_x:
             return df_borough.iloc[j]['BoroughID']
 
 def replace_zone_for_index(p_x):
-    '''Retorna el índice correspondiente a la Service Zone
-    param: p_x String ->Service Zone de la cuál deseo saber el índice'''
+    """
+    Retorna el índice correspondiente a la Service Zone.
+    :type p_x: str
+    :param p_x:Service Zone de la cuál deseo saber el índice.
+    """
     for j, zone in enumerate(df_service_zone['Service_Zone']):
         if zone == p_x:
             return df_service_zone.iloc[j]['Service_ZoneID']
@@ -212,3 +220,62 @@ df_rate_code.to_csv('../tables/rate_code.csv', index=False)
 df_payment_type.to_csv('../tables/payment_type.csv', index=False)
 df_zone.to_csv('../tables/zone.csv', index=False)
 df_payment.to_csv('../tables/payment.csv', index=False)
+
+# Se instancia la sesión con las credenciales de acceso para la conexión a S3 para carga de tablas al data lake.
+sesion = boto3.session.Session(
+    aws_access_key_id='AKIASPG3VE3KGTL2HGMN',
+    aws_secret_access_key='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',
+    region_name='us-east-1'
+)
+
+# Se establece la conexión al servicio
+connection = sesion.resource(service_name='s3')
+
+# Se declara una variable con el nombre del bucket
+
+bucket = 'henry-pg9'
+
+
+# Usando StringIO se crea un objeto en memoria que contiene una cadena de caracteres con la información de cada dataframe y se almacena en la variable csv_buffer
+# este bufer lo usamos para escribir al archivo csv y por últmo usando la conexión al servicio s3 guardamos en el bucket el dataframe como archivo csv.
+# Este método está limitado por la RAM, si el dataframe llega a ser más grande que la RAM disponible, el código entrará en una excepción y no almacenará nada.
+
+csv_buffer = StringIO()
+df_vendor.to_csv(csv_buffer, index=False)
+connection.Object(bucket,'processed_data/tables/df_vendor.csv').put(Body=csv_buffer.getvalue())
+
+csv_buffer = StringIO()
+df_calendar.to_csv(csv_buffer, index=False)
+connection.Object(bucket,'processed_data/tables/df_calendar.csv').put(Body=csv_buffer.getvalue())
+
+csv_buffer = StringIO()
+df_borough.to_csv(csv_buffer, index=False)
+connection.Object(bucket,'processed_data/tables/df_borough.csv').put(Body=csv_buffer.getvalue())
+
+csv_buffer = StringIO()
+df_service_zone.to_csv(csv_buffer, index=False)
+connection.Object(bucket,'processed_data/tables/df_service_zone.csv').put(Body=csv_buffer.getvalue())
+
+csv_buffer = StringIO()
+df_trip.to_csv(csv_buffer, index=False)
+connection.Object(bucket,'processed_data/tables/df_trip.csv').put(Body=csv_buffer.getvalue())
+
+csv_buffer = StringIO()
+df_precip_type.to_csv(csv_buffer, index=False)
+connection.Object(bucket,'processed_data/tables/df_precip_type.csv').put(Body=csv_buffer.getvalue())
+
+csv_buffer = StringIO()
+df_rate_code.to_csv(csv_buffer, index=False)
+connection.Object(bucket,'processed_data/tables/df_rate_code.csv').put(Body=csv_buffer.getvalue())
+
+csv_buffer = StringIO()
+df_payment_type.to_csv(csv_buffer, index=False)
+connection.Object(bucket,'processed_data/tables/df_payment_type.csv').put(Body=csv_buffer.getvalue())
+
+csv_buffer = StringIO()
+df_zone.to_csv(csv_buffer, index=False)
+connection.Object(bucket,'processed_data/tables/df_zone.csv').put(Body=csv_buffer.getvalue())
+
+csv_buffer = StringIO()
+df_payment.to_csv(csv_buffer, index=False)
+connection.Object(bucket,'processed_data/tables/df_payment.csv').put(Body=csv_buffer.getvalue())

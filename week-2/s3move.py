@@ -15,7 +15,7 @@ connection = sesion.resource(service_name='s3')
 # los archivos que se encuentran dentro se copian al directorio processed_data/raw_data y luego se
 # borran del directorio raw_data original.
 
-buck = connection.Bucket('copymovetest')
+buck = connection.Bucket('henry-pg9')
 files= buck.objects.filter(Prefix='raw_data/')
 for file in files:
     if file.key[-1]=='/':

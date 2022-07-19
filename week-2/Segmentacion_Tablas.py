@@ -1,6 +1,8 @@
 
 import pandas as pd
 import numpy as np
+import requests
+import json
 
 # -- Cargamos los datos de las zonas dentro de Nueva York --#
 df_all_zones = pd.read_csv('../data/taxi+_zone_lookup.csv')
@@ -69,7 +71,6 @@ def replace_bor_for_index(p_x):
         if bor == p_x:
             return df_borough.iloc[j]['BoroughID']
 
-
 def replace_zone_for_index(p_x):
     '''Retorna el índice correspondiente a la Service Zone
     param: p_x String ->Service Zone de la cuál deseo saber el índice'''
@@ -80,6 +81,7 @@ def replace_zone_for_index(p_x):
 
 df_zone['BoroughID'] = df_zone['Borough'].apply(replace_bor_for_index)
 df_zone['Service_ZoneID'] = df_zone['service_zone'].apply(replace_zone_for_index)
+
 
 # -- Rate_Code --#
 df_rate_code = pd.DataFrame({
@@ -172,6 +174,32 @@ df_payment = df_payment.rename(
     columns={'RatecodeID': 'IdRate_Code', 'payment_type': 'IdPayment_Type', 'fare_amount': 'Fare_Amount',
                            'extra': 'Extra', 'mta_tax': 'MTA_Tax', 'improvement_surcharge': 'Improvement_Surcharge',
                            'tolls_amount': 'Tolls_Amount', 'total_amount': 'Total_Amount'})
+
+# Agregamos Latitud y Longitud
+def latitudYlongitud():
+    '''Agrega la Latitud y Longitud al DataFrame de Zones de la ubicación geográfica'''
+    df = pd.merge(df_zone, df_borough, on='IdBorough')
+    latitudes = []
+    longitudes = []
+    for i, row in df.iterrows():
+        address = row['Zone'] +','+ row['Borough']
+        parameters = {
+            'key': 'OeOx3nK0ZLtQni4idyeJBoRdXp6Wiqqx',
+            'location': address
+        }
+        res = requests.get('http://www.mapquestapi.com/geocoding/v1/address', params=parameters)
+        data = json.loads(res.text)['results'][0]['locations'][0]
+        lat = data['latLng']['lat']
+        lon = data['latLng']['lng']
+        latitudes.append(lat)
+        longitudes.append(lon)
+        
+    df = df.drop(columns=['Borough'])
+    df['lat'] = latitudes
+    df['lon'] = longitudes
+    return df
+
+df_zone = latitudYlongitud()
 
 # -- Exportar a archivos CSV --#
 df_vendor.to_csv('../tables/vendor.csv', index=False)

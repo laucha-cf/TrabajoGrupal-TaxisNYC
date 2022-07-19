@@ -106,6 +106,9 @@ for i, name in enumerate(tables_names):
     else:      
         fill_table( name, dataframes[i] )
 
+#Cerramos la conexión y la sesión con la base de datos
+connection.close()
+engine.dispose()
 # Anotamos los tiempos de carga
 df_times['Start'] = start_tms
 df_times['Stop'] = end_tms

@@ -4,6 +4,9 @@
 /processed_data
 /tables
 /virtual-env
+/week-2/TiempoEjecucion.csv
+/week-2/tiempoExec.ipynb
+getGeolocation.ipynb
 
 .idea
 week-2/data

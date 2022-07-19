@@ -47,8 +47,8 @@ class Zone(Base):
     IdBorough = Column(Integer, ForeignKey('Borough.IdBorough'))
     IdService_Zone = Column(Integer, ForeignKey('Service_Zone.IdService_Zone'))
     trips = relationship('Trip')
-
-
+    lat = Column(DECIMAL(10,7))
+    lon = Column(DECIMAL(10,7))
 class Vendor(Base):
     __tablename__ = 'Vendor'
     IdVendor = Column(Integer, primary_key=True)
@@ -122,3 +122,6 @@ class Payment(Base):
 
 # -- Creación de tablas en la DB -- #
 Base.metadata.create_all(engine)
+
+#Cerramos la conexión
+engine.dispose()

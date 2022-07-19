@@ -240,42 +240,12 @@ bucket = 'henry-pg9'
 # este bufer lo usamos para escribir al archivo csv y por últmo usando la conexión al servicio s3 guardamos en el bucket el dataframe como archivo csv.
 # Este método está limitado por la RAM, si el dataframe llega a ser más grande que la RAM disponible, el código entrará en una excepción y no almacenará nada.
 
-csv_buffer = StringIO()
-df_vendor.to_csv(csv_buffer, index=False)
-connection.Object(bucket,'processed_data/tables/df_vendor.csv').put(Body=csv_buffer.getvalue())
+lista_dataframes = [df_vendor, df_calendar, df_borough, df_service_zone, df_trip, df_precip_type, df_rate_code, df_payment_type, df_zone, df_payment]
+lista_nombres = ['df_vendor', 'df_calendar', 'df_borough', 'df_service_zone', 'df_trip', 'df_precip_type', 'df_rate_code', 'df_payment_type', 'df_zone', 'df_payment']
 
-csv_buffer = StringIO()
-df_calendar.to_csv(csv_buffer, index=False)
-connection.Object(bucket,'processed_data/tables/df_calendar.csv').put(Body=csv_buffer.getvalue())
 
-csv_buffer = StringIO()
-df_borough.to_csv(csv_buffer, index=False)
-connection.Object(bucket,'processed_data/tables/df_borough.csv').put(Body=csv_buffer.getvalue())
+for i, df in enumerate(lista_dataframes):
+    csv_buffer = StringIO()
+    df.to_csv(csv_buffer, index=False)
+    connection.Object(bucket,f'processed_data/tables/{lista_nombres[i]}.csv').put(Body=csv_buffer.getvalue())
 
-csv_buffer = StringIO()
-df_service_zone.to_csv(csv_buffer, index=False)
-connection.Object(bucket,'processed_data/tables/df_service_zone.csv').put(Body=csv_buffer.getvalue())
-
-csv_buffer = StringIO()
-df_trip.to_csv(csv_buffer, index=False)
-connection.Object(bucket,'processed_data/tables/df_trip.csv').put(Body=csv_buffer.getvalue())
-
-csv_buffer = StringIO()
-df_precip_type.to_csv(csv_buffer, index=False)
-connection.Object(bucket,'processed_data/tables/df_precip_type.csv').put(Body=csv_buffer.getvalue())
-
-csv_buffer = StringIO()
-df_rate_code.to_csv(csv_buffer, index=False)
-connection.Object(bucket,'processed_data/tables/df_rate_code.csv').put(Body=csv_buffer.getvalue())
-
-csv_buffer = StringIO()
-df_payment_type.to_csv(csv_buffer, index=False)
-connection.Object(bucket,'processed_data/tables/df_payment_type.csv').put(Body=csv_buffer.getvalue())
-
-csv_buffer = StringIO()
-df_zone.to_csv(csv_buffer, index=False)
-connection.Object(bucket,'processed_data/tables/df_zone.csv').put(Body=csv_buffer.getvalue())
-
-csv_buffer = StringIO()
-df_payment.to_csv(csv_buffer, index=False)
-connection.Object(bucket,'processed_data/tables/df_payment.csv').put(Body=csv_buffer.getvalue())

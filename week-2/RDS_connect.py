@@ -53,7 +53,7 @@ def fill_table(p_name, p_dataframe):
     Función para poblar las tablas mediante SQLAlchemy.
 
     :type p_name: str
-    :param: p_name: Nombre de la tabla a poblar.
+    :param p_name: Nombre de la tabla a poblar.
 
     :type p_dataframe: pandas.DataFrame
     :param p_dataframe: DataFrame a insertar en la tabla.
@@ -109,3 +109,6 @@ df_times['Start'] = start_tms
 df_times['Stop'] = end_tms
 df_times['RunTime'] = df_times['Stop'] - df_times['Start']
 df_times.to_csv('TiempoEjecucion.csv')
+
+# Cerramos todas las conexiones
+engine.dispose()

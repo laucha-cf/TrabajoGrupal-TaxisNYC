@@ -64,16 +64,22 @@ df_zone.rename(columns={
 
 
 def replace_bor_for_index(p_x):
-    '''Retorna el índice correspondiente al Borough
-    param: p_x String ->Borough del cuál deseo saber el índice'''
+    """
+    Retorna el índice correspondiente al Borough.
+    :type p_x: str
+    :param p_x: Borough del cuál deseo saber el índice.
+    """
     for j, bor in enumerate(df_borough['Borough']):
         if bor == p_x:
             return df_borough.iloc[j]['BoroughID']
 
 
 def replace_zone_for_index(p_x):
-    '''Retorna el índice correspondiente a la Service Zone
-    param: p_x String ->Service Zone de la cuál deseo saber el índice'''
+    """
+    Retorna el índice correspondiente a la Service Zone.
+    :type p_x: str
+    :param p_x:Service Zone de la cuál deseo saber el índice.
+    """
     for j, zone in enumerate(df_service_zone['Service_Zone']):
         if zone == p_x:
             return df_service_zone.iloc[j]['Service_ZoneID']

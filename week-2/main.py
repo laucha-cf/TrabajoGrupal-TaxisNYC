@@ -12,5 +12,5 @@ if __name__ == '__main__':
     print('Segmentación de Tablas...')
     exec(open('Segmentacion_Tablas.py').read())
     
-    print('RDS connect...')
-    exec(open('RDS_connect.py').read())
+    print('Carga inicial...')
+    exec(open('Carga_inicial.py').read())

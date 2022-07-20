@@ -26,7 +26,7 @@ metadata = MetaData()
 insp = inspect(engine)
 
 # Se levantan los dataframes correspondientes a cada tabla
-Trip_df = pd.read_csv('../tables/trip.csv', dtype={'Duration': int})
+Trip_df = pd.read_csv('../tables/trip.csv', dtype={'duration': int})
 Payment_df = pd.read_csv('../tables/payment.csv')
 Vendor_df = pd.read_csv('../tables/vendor.csv')
 Borough_df = pd.read_csv('../tables/borough.csv')
@@ -41,8 +41,8 @@ Zone_df = pd.read_csv('../tables/zone.csv')
 # Para las tablas con mayor número de registros se recomienda trabajar con el parametro chunksize
 dataframes = [Service_Zone_df, Borough_df, Zone_df, Vendor_df, Calendar_df, Precip_Type_df, Rate_Code_df,
               Payment_Type_df, Trip_df, Payment_df]
-tables_names = ['Service_Zone', 'Borough', 'Zone', 'Vendor', 'Calendar', 'Precip_Type', 'Rate_Code',
-                'Payment_Type', 'Trip', 'Payment']
+tables_names = ['service_zone', 'borough', 'zone', 'vendor', 'calendar', 'precip_type', 'rate_code',
+                'payment_type', 'trip', 'payment']
 df_times = pd.DataFrame({'tables': tables_names})
 start_tms = []
 end_tms = []
@@ -95,23 +95,21 @@ def sql_copy_opt(df, tablename, eng):
 
 # Poblamos todas las tablas
 for i, name in enumerate(tables_names):
-    if name == 'Trip':
-        Trip_df.loc[(Trip_df['IdPrecip_Type'].isna()), 'IdPrecip_Type'] = 0
-        Trip_df.IdPrecip_Type = [*map(round, Trip_df.IdPrecip_Type)]
-        sql_copy_opt(Trip_df, 'Trip', engine)
-    elif name == 'Payment':
-        sql_copy_opt(Payment_df, 'Payment', engine)
+    if name == 'trip':
+        Trip_df.loc[(Trip_df['idprecip_type'].isna()), 'idprecip_type'] = 0
+        Trip_df.idprecip_type = [*map(round, Trip_df.idprecip_type)]
+        sql_copy_opt(Trip_df, name, engine)
+    elif name == 'payment':
+        sql_copy_opt(Payment_df, name, engine)
     else:      
         fill_table(name, dataframes[i])
 
 #Cerramos la conexión y la sesión con la base de datos
 connection.close()
 engine.dispose()
+
 # Anotamos los tiempos de carga
 df_times['Start'] = start_tms
 df_times['Stop'] = end_tms
 df_times['RunTime'] = df_times['Stop'] - df_times['Start']
 df_times.to_csv('TiempoEjecucion.csv')
-
-# Cerramos todas las conexiones
-engine.dispose()

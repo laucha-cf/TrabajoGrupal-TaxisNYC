@@ -129,7 +129,7 @@ df_calendar['Month'] = df_calendar['Date'].dt.month
 df_calendar['Day'] = df_calendar['Date'].dt.day
 df_calendar['Week'] = df_calendar['Date'].dt.isocalendar().week
 df_calendar['Day_of_Week'] = df_calendar['Date'].dt.weekday
-# %%
+
 # -- Trip --#
 datetime = df['tpep_pickup_datetime'].str.split()
 dates = []
@@ -168,46 +168,54 @@ df_payment.insert(loc=0, column='IdPayment', value=np.arange(len(df_payment)))
 df_zone = df_zone.drop(columns=['Borough', 'service_zone'])
 
 # -- Renombrar Columnas - Normalizar --#
-df_vendor.columns = ['IdVendor', 'Vendor']
-df_calendar = df_calendar.rename(columns={'DateID': 'IdDate'})
-df_borough.columns = ['IdBorough', 'Borough']
-df_service_zone = df_service_zone.rename(columns={'Service_ZoneID': 'IdService_Zone'})
-df_trip = df_trip.rename(columns={'VendorID': 'IdVendor', 'Date': 'IdDate',
-                                  'Passenger_count': 'Passenger_Count', 'Precip_Type': 'IdPrecip_Type'})
-df_precip_type = df_precip_type.rename(columns={'Precip_TypeID': 'IdPrecip_Type'})
-df_rate_code = df_rate_code.rename(columns={'RateCodeID': 'IdRate_Code', 'RateCode': 'Rate_Code'})
-df_payment_type = df_payment_type.rename(columns={'PaymentTypeID': 'IdPayment_Type', 'PaymentType': 'Payment_Type'})
-df_zone = df_zone.rename(columns={'ZoneID': 'IdZone', 'BoroughID': 'IdBorough', 'Service_ZoneID': 'IdService_Zone'})
-df_payment = df_payment.rename(
-    columns={'RatecodeID': 'IdRate_Code', 'payment_type': 'IdPayment_Type', 'fare_amount': 'Fare_Amount',
-                           'extra': 'Extra', 'mta_tax': 'MTA_Tax', 'improvement_surcharge': 'Improvement_Surcharge',
-                           'tolls_amount': 'Tolls_Amount', 'total_amount': 'Total_Amount'})
+df_vendor.columns = ['idvendor', 'vendor']
 
+df_calendar.columns = ['iddate', 'date', 'year', 'month', 'day', 'week', 'day_of_week']
+
+df_borough.columns = ['idborough', 'borough']
+
+df_service_zone.columns = ['idservice_zone', 'service_zone']
+
+df_trip.columns = ['iptrip', 'idvendor', 'iddate', 'pu_time', 'duration', 'passenger_count',
+                    'distance', 'pu_idzone', 'do_idzone', 'temperature', 'idprecip_type']
+
+df_precip_type.columns = ['idprecip_type', 'precip_type']
+
+df_rate_code.columns = ['idrate_code', 'rate_code']
+
+df_payment_type.columns = ['idpayment_type', 'payment_type']
+
+df_zone.columns = ['idzone', 'zone', 'idborough', 'idservice_zone']
+
+df_payment.columns = ['idpayment', 'idtrip', 'idrate_code', 'idpayment_type', 'fare_amount',
+                    'extra', 'mta_tax', 'improvement_surcharge', 'tolls_amount', 'total_amount']
+
+# Por ahora comento estas líneas ya que al parecer no van a ser usadas, dependiendo de como siga la semana se borra todo este bloque.
 # Agregamos Latitud y Longitud
-def latitudYlongitud():
-    '''Agrega la Latitud y Longitud al DataFrame de Zones de la ubicación geográfica'''
-    df = pd.merge(df_zone, df_borough, on='IdBorough')
-    latitudes = []
-    longitudes = []
-    for i, row in df.iterrows():
-        address = row['Zone'] +','+ row['Borough']
-        parameters = {
-            'key': 'OeOx3nK0ZLtQni4idyeJBoRdXp6Wiqqx',
-            'location': address
-        }
-        res = requests.get('http://www.mapquestapi.com/geocoding/v1/address', params=parameters)
-        data = json.loads(res.text)['results'][0]['locations'][0]
-        lat = data['latLng']['lat']
-        lon = data['latLng']['lng']
-        latitudes.append(lat)
-        longitudes.append(lon)
+# def latitudYlongitud():
+#     '''Agrega la Latitud y Longitud al DataFrame de Zones de la ubicación geográfica'''
+#     df = pd.merge(df_zone, df_borough, on='IdBorough')
+#     latitudes = []
+#     longitudes = []
+#     for i, row in df.iterrows():
+#         address = row['Zone'] +','+ row['Borough']
+#         parameters = {
+#             'key': 'OeOx3nK0ZLtQni4idyeJBoRdXp6Wiqqx',
+#             'location': address
+#         }
+#         res = requests.get('http://www.mapquestapi.com/geocoding/v1/address', params=parameters)
+#         data = json.loads(res.text)['results'][0]['locations'][0]
+#         lat = data['latLng']['lat']
+#         lon = data['latLng']['lng']
+#         latitudes.append(lat)
+#         longitudes.append(lon)
         
-    df = df.drop(columns=['Borough'])
-    df['lat'] = latitudes
-    df['lon'] = longitudes
-    return df
+#     df = df.drop(columns=['Borough'])
+#     df['lat'] = latitudes
+#     df['lon'] = longitudes
+#     return df
 
-df_zone = latitudYlongitud()
+# df_zone = latitudYlongitud()
 
 # -- Exportar a archivos CSV --#
 df_vendor.to_csv('../tables/vendor.csv', index=False)
@@ -235,7 +243,6 @@ connection = sesion.resource(service_name='s3')
 
 bucket = 'henry-pg9'
 
-
 # Usando StringIO se crea un objeto en memoria que contiene una cadena de caracteres con la información de cada dataframe y se almacena en la variable csv_buffer
 # este bufer lo usamos para escribir al archivo csv y por últmo usando la conexión al servicio s3 guardamos en el bucket el dataframe como archivo csv.
 # Este método está limitado por la RAM, si el dataframe llega a ser más grande que la RAM disponible, el código entrará en una excepción y no almacenará nada.
@@ -248,4 +255,3 @@ for i, df in enumerate(lista_dataframes):
     csv_buffer = StringIO()
     df.to_csv(csv_buffer, index=False)
     connection.Object(bucket,f'processed_data/tables/{lista_nombres[i]}.csv').put(Body=csv_buffer.getvalue())
-

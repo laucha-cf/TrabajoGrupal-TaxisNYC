@@ -176,7 +176,7 @@ df_borough.columns = ['idborough', 'borough']
 
 df_service_zone.columns = ['idservice_zone', 'service_zone']
 
-df_trip.columns = ['iptrip', 'idvendor', 'iddate', 'pu_time', 'duration', 'passenger_count',
+df_trip.columns = ['idtrip', 'idvendor', 'iddate', 'pu_time', 'duration', 'passenger_count',
                     'distance', 'pu_idzone', 'do_idzone', 'temperature', 'idprecip_type']
 
 df_precip_type.columns = ['idprecip_type', 'precip_type']

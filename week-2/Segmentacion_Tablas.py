@@ -128,7 +128,7 @@ df_calendar['Year'] = df_calendar['Date'].dt.year
 df_calendar['Month'] = df_calendar['Date'].dt.month
 df_calendar['Day'] = df_calendar['Date'].dt.day
 df_calendar['Week'] = df_calendar['Date'].dt.isocalendar().week
-df_calendar['Day_of_Week'] = df_calendar['Date'].dt.weekday
+df_calendar['Day_of_Week'] = df_calendar['Date'].dt.day_name
 
 # -- Trip --#
 datetime = df['tpep_pickup_datetime'].str.split()

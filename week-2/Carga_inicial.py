@@ -36,13 +36,14 @@ Rate_Code_df = pd.read_csv('../tables/rate_code.csv')
 Payment_Type_df = pd.read_csv('../tables/payment_type.csv')
 Calendar_df = pd.read_csv('../tables/calendar.csv')
 Zone_df = pd.read_csv('../tables/zone.csv')
+Outlier_df = pd.read_csv('../tables/outlier.csv')
 
 # Carga los contenidos de los dataframes en las tablas correspondientes en la DB, se recomienda ejecutar uno por uno.
 # Para las tablas con mayor número de registros se recomienda trabajar con el parametro chunksize
 dataframes = [Service_Zone_df, Borough_df, Zone_df, Vendor_df, Calendar_df, Precip_Type_df, Rate_Code_df,
-              Payment_Type_df, Trip_df, Payment_df]
+              Payment_Type_df, Trip_df, Payment_df, Outlier_df]
 tables_names = ['service_zone', 'borough', 'zone', 'vendor', 'calendar', 'precip_type', 'rate_code',
-                'payment_type', 'trip', 'payment']
+                'payment_type', 'trip', 'payment', 'aux_outlier']
 df_times = pd.DataFrame({'tables': tables_names})
 start_tms = []
 end_tms = []

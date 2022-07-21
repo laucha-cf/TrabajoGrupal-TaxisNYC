@@ -8,8 +8,9 @@ from io import StringIO
 
 # -- Cargamos los datos de las zonas dentro de Nueva York --#
 df_all_zones = pd.read_csv('../data/taxi+_zone_lookup.csv')
-# -- Cargamos los datos de los viajes en taxi. Datos previamente procesados --#
+# -- Cargamos los datos de los viajes en taxi. Datos previamente procesados, así como los outliers --#
 df_all = pd.read_csv('../processed_data/data_taxis_nyc_2018.csv', parse_dates=['tpep_pickup_datetime'])
+df_outliers = pd.read_csv('../processed_data/outliers.csv')
 # -- Creamos una copia del DataFrame para no afectar el original --#
 df = df_all.copy()
 
@@ -164,6 +165,9 @@ df_payment = df[['RatecodeID', 'payment_type', 'fare_amount', 'extra', 'mta_tax'
 df_payment.insert(loc=0, column='IdTrip', value=df_trip['IdTrip'])
 df_payment.insert(loc=0, column='IdPayment', value=np.arange(len(df_payment)))
 
+# -- Outlier -- #
+df_outliers = df_outliers[['Unnamed: 0']]
+
 # -- Eliminamos columnas previamente utilizadas, pero que no cumplen con el modelo entidad-relación planteado --#
 df_zone = df_zone.drop(columns=['Borough', 'service_zone'])
 
@@ -189,6 +193,8 @@ df_zone.columns = ['idzone', 'zone', 'idborough', 'idservice_zone']
 
 df_payment.columns = ['idpayment', 'idtrip', 'idrate_code', 'idpayment_type', 'fare_amount',
                     'extra', 'mta_tax', 'improvement_surcharge', 'tolls_amount', 'total_amount']
+
+df_outliers.columns = ['idrecord']
 
 # Por ahora comento estas líneas ya que al parecer no van a ser usadas, dependiendo de como siga la semana se borra todo este bloque.
 # Agregamos Latitud y Longitud
@@ -228,6 +234,7 @@ df_rate_code.to_csv('../tables/rate_code.csv', index=False)
 df_payment_type.to_csv('../tables/payment_type.csv', index=False)
 df_zone.to_csv('../tables/zone.csv', index=False)
 df_payment.to_csv('../tables/payment.csv', index=False)
+df_outliers.to_csv('../tables/outlier.csv', index=False)
 
 # Se instancia la sesión con las credenciales de acceso para la conexión a S3 para carga de tablas al data lake.
 sesion = boto3.session.Session(
@@ -247,8 +254,8 @@ bucket = 'henry-pg9'
 # este bufer lo usamos para escribir al archivo csv y por últmo usando la conexión al servicio s3 guardamos en el bucket el dataframe como archivo csv.
 # Este método está limitado por la RAM, si el dataframe llega a ser más grande que la RAM disponible, el código entrará en una excepción y no almacenará nada.
 
-lista_dataframes = [df_vendor, df_calendar, df_borough, df_service_zone, df_trip, df_precip_type, df_rate_code, df_payment_type, df_zone, df_payment]
-lista_nombres = ['df_vendor', 'df_calendar', 'df_borough', 'df_service_zone', 'df_trip', 'df_precip_type', 'df_rate_code', 'df_payment_type', 'df_zone', 'df_payment']
+lista_dataframes = [df_vendor, df_calendar, df_borough, df_service_zone, df_trip, df_precip_type, df_rate_code, df_payment_type, df_zone, df_payment, df_outliers]
+lista_nombres = ['df_vendor', 'df_calendar', 'df_borough', 'df_service_zone', 'df_trip', 'df_precip_type', 'df_rate_code', 'df_payment_type', 'df_zone', 'df_payment', 'df_outliers']
 
 
 for i, df in enumerate(lista_dataframes):

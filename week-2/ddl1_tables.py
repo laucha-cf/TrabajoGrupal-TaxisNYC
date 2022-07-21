@@ -120,6 +120,11 @@ class Payment(Base):
     trips = relationship('trip')
 
 
+class Outlier(Base):
+    __tablename__ = 'aux_outlier'
+    idrecord = Column(Integer, primary_key=True)
+
+
 # -- Creación de tablas en la DB -- #
 Base.metadata.create_all(engine)
 

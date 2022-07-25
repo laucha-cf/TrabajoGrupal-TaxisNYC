@@ -8,11 +8,11 @@ import time
 # -- CONSTANTES -- #
 DBMS = 'postgresql'
 DRIVER = 'psycopg2'
-USER = os.environ.get('DB_USERNAME')
-PASSWORD = os.environ.get('DB_PASSWORD')
-HOST = os.environ.get('DB_ENDPOINT')
+USER = 'postgres'
+PASSWORD = 'shakejunt02'
+HOST = 'localhost'
 PORT = '5432'
-DB_NAME = os.environ.get('DB_NAME')
+DB_NAME = 'G9'
 
 # crea la conexión a la base de datos, primero crea un engine que es basicamente una instancia de la base de datos
 # cuando ya está instanciada se crea la conexión a la base de datos
@@ -104,9 +104,7 @@ for i, name in enumerate(tables_names):
     else:      
         fill_table(name, dataframes[i])
 
-#Cerramos la conexión y la sesión con la base de datos
-connection.close()
-engine.dispose()
+
 # Anotamos los tiempos de carga
 df_times['Start'] = start_tms
 df_times['Stop'] = end_tms

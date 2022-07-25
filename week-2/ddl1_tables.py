@@ -7,11 +7,11 @@ from sqlalchemy_utils import database_exists, create_database
 
 #  -- CONSTANTES -- #
 DBMS = 'postgresql'
-USER = os.environ.get('DB_USERNAME')
-PASSWORD = os.environ.get('DB_PASSWORD')
-HOST = os.environ.get('DB_ENDPOINT')
+USER = 'postgres'
+PASSWORD = 'shakejunt02'
+HOST = 'localhost'
 PORT = '5432'
-DB_NAME = os.environ.get('DB_NAME')
+DB_NAME = 'G9'
 
 # -- Creación del engine y de la db -- #
 engine = create_engine(f'{DBMS}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}')

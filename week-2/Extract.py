@@ -14,6 +14,7 @@ sesion = boto3.session.Session(
 # Se establece la conexión al servicio y se hace la lectura de archivos a la lista filenames
 connection = sesion.resource(service_name='s3')
 filenames = [obj.key for obj in connection.Bucket('henry-pg9').objects.all()]
+raw_data = [name for name in filenames if name[: 8] == 'raw_data' and name[-1] != '/']
 
 # Se declaran 3 listas donde se van a almacenar los nombres de los archivos según su tipo (clima, zonas y viajes)
 # posteriormente se almacenan en estas listas los archivos o rutas para lectura
@@ -21,7 +22,7 @@ weather = []
 zones = []
 trips = []
 
-for name in filenames:
+for name in raw_data:
     if name[9:11] == 'NY':
         weather.append(name)
     elif name[9:13] == 'taxi':

@@ -8,8 +8,9 @@ from io import StringIO
 
 # -- Cargamos los datos de las zonas dentro de Nueva York --#
 df_all_zones = pd.read_csv('../data/taxi+_zone_lookup.csv')
-# -- Cargamos los datos de los viajes en taxi. Datos previamente procesados --#
+# -- Cargamos los datos de los viajes en taxi. Datos previamente procesados, así como los outliers --#
 df_all = pd.read_csv('../processed_data/data_taxis_nyc_2018.csv', parse_dates=['tpep_pickup_datetime'])
+df_outliers = pd.read_csv('../processed_data/outliers.csv')
 # -- Creamos una copia del DataFrame para no afectar el original --#
 df = df_all.copy()
 
@@ -128,8 +129,8 @@ df_calendar['Year'] = df_calendar['Date'].dt.year
 df_calendar['Month'] = df_calendar['Date'].dt.month
 df_calendar['Day'] = df_calendar['Date'].dt.day
 df_calendar['Week'] = df_calendar['Date'].dt.isocalendar().week
-df_calendar['Day_of_Week'] = df_calendar['Date'].dt.weekday
-# %%
+df_calendar['Day_of_Week'] = df_calendar['Date'].dt.day_name
+
 # -- Trip --#
 datetime = df['tpep_pickup_datetime'].str.split()
 dates = []
@@ -164,50 +165,63 @@ df_payment = df[['RatecodeID', 'payment_type', 'fare_amount', 'extra', 'mta_tax'
 df_payment.insert(loc=0, column='IdTrip', value=df_trip['IdTrip'])
 df_payment.insert(loc=0, column='IdPayment', value=np.arange(len(df_payment)))
 
+# -- Outlier -- #
+df_outliers = df_outliers[['Unnamed: 0']]
+
 # -- Eliminamos columnas previamente utilizadas, pero que no cumplen con el modelo entidad-relación planteado --#
 df_zone = df_zone.drop(columns=['Borough', 'service_zone'])
 
 # -- Renombrar Columnas - Normalizar --#
-df_vendor.columns = ['IdVendor', 'Vendor']
-df_calendar = df_calendar.rename(columns={'DateID': 'IdDate'})
-df_borough.columns = ['IdBorough', 'Borough']
-df_service_zone = df_service_zone.rename(columns={'Service_ZoneID': 'IdService_Zone'})
-df_trip = df_trip.rename(columns={'VendorID': 'IdVendor', 'Date': 'IdDate',
-                                  'Passenger_count': 'Passenger_Count', 'Precip_Type': 'IdPrecip_Type'})
-df_precip_type = df_precip_type.rename(columns={'Precip_TypeID': 'IdPrecip_Type'})
-df_rate_code = df_rate_code.rename(columns={'RateCodeID': 'IdRate_Code', 'RateCode': 'Rate_Code'})
-df_payment_type = df_payment_type.rename(columns={'PaymentTypeID': 'IdPayment_Type', 'PaymentType': 'Payment_Type'})
-df_zone = df_zone.rename(columns={'ZoneID': 'IdZone', 'BoroughID': 'IdBorough', 'Service_ZoneID': 'IdService_Zone'})
-df_payment = df_payment.rename(
-    columns={'RatecodeID': 'IdRate_Code', 'payment_type': 'IdPayment_Type', 'fare_amount': 'Fare_Amount',
-                           'extra': 'Extra', 'mta_tax': 'MTA_Tax', 'improvement_surcharge': 'Improvement_Surcharge',
-                           'tolls_amount': 'Tolls_Amount', 'total_amount': 'Total_Amount'})
+df_vendor.columns = ['idvendor', 'vendor']
 
+df_calendar.columns = ['iddate', 'date', 'year', 'month', 'day', 'week', 'day_of_week']
+
+df_borough.columns = ['idborough', 'borough']
+
+df_service_zone.columns = ['idservice_zone', 'service_zone']
+
+df_trip.columns = ['idtrip', 'idvendor', 'iddate', 'pu_time', 'duration', 'passenger_count',
+                    'distance', 'pu_idzone', 'do_idzone', 'temperature', 'idprecip_type']
+
+df_precip_type.columns = ['idprecip_type', 'precip_type']
+
+df_rate_code.columns = ['idrate_code', 'rate_code']
+
+df_payment_type.columns = ['idpayment_type', 'payment_type']
+
+df_zone.columns = ['idzone', 'zone', 'idborough', 'idservice_zone']
+
+df_payment.columns = ['idpayment', 'idtrip', 'idrate_code', 'idpayment_type', 'fare_amount',
+                    'extra', 'mta_tax', 'improvement_surcharge', 'tolls_amount', 'total_amount']
+
+df_outliers.columns = ['idrecord']
+
+# Por ahora comento estas líneas ya que al parecer no van a ser usadas, dependiendo de como siga la semana se borra todo este bloque.
 # Agregamos Latitud y Longitud
-def latitudYlongitud():
-    '''Agrega la Latitud y Longitud al DataFrame de Zones de la ubicación geográfica'''
-    df = pd.merge(df_zone, df_borough, on='IdBorough')
-    latitudes = []
-    longitudes = []
-    for i, row in df.iterrows():
-        address = row['Zone'] +','+ row['Borough']
-        parameters = {
-            'key': 'OeOx3nK0ZLtQni4idyeJBoRdXp6Wiqqx',
-            'location': address
-        }
-        res = requests.get('http://www.mapquestapi.com/geocoding/v1/address', params=parameters)
-        data = json.loads(res.text)['results'][0]['locations'][0]
-        lat = data['latLng']['lat']
-        lon = data['latLng']['lng']
-        latitudes.append(lat)
-        longitudes.append(lon)
+# def latitudYlongitud():
+#     '''Agrega la Latitud y Longitud al DataFrame de Zones de la ubicación geográfica'''
+#     df = pd.merge(df_zone, df_borough, on='IdBorough')
+#     latitudes = []
+#     longitudes = []
+#     for i, row in df.iterrows():
+#         address = row['Zone'] +','+ row['Borough']
+#         parameters = {
+#             'key': 'OeOx3nK0ZLtQni4idyeJBoRdXp6Wiqqx',
+#             'location': address
+#         }
+#         res = requests.get('http://www.mapquestapi.com/geocoding/v1/address', params=parameters)
+#         data = json.loads(res.text)['results'][0]['locations'][0]
+#         lat = data['latLng']['lat']
+#         lon = data['latLng']['lng']
+#         latitudes.append(lat)
+#         longitudes.append(lon)
         
-    df = df.drop(columns=['Borough'])
-    df['lat'] = latitudes
-    df['lon'] = longitudes
-    return df
+#     df = df.drop(columns=['Borough'])
+#     df['lat'] = latitudes
+#     df['lon'] = longitudes
+#     return df
 
-df_zone = latitudYlongitud()
+# df_zone = latitudYlongitud()
 
 # -- Exportar a archivos CSV --#
 df_vendor.to_csv('../tables/vendor.csv', index=False)
@@ -220,6 +234,7 @@ df_rate_code.to_csv('../tables/rate_code.csv', index=False)
 df_payment_type.to_csv('../tables/payment_type.csv', index=False)
 df_zone.to_csv('../tables/zone.csv', index=False)
 df_payment.to_csv('../tables/payment.csv', index=False)
+df_outliers.to_csv('../tables/outlier.csv', index=False)
 
 # Se instancia la sesión con las credenciales de acceso para la conexión a S3 para carga de tablas al data lake.
 #sesion = boto3.session.Session(
@@ -234,7 +249,6 @@ df_payment.to_csv('../tables/payment.csv', index=False)
 ## Se declara una variable con el nombre del bucket
 #
 #bucket = 'henry-pg9'
-
 
 # Usando StringIO se crea un objeto en memoria que contiene una cadena de caracteres con la información de cada dataframe y se almacena en la variable csv_buffer
 # este bufer lo usamos para escribir al archivo csv y por últmo usando la conexión al servicio s3 guardamos en el bucket el dataframe como archivo csv.

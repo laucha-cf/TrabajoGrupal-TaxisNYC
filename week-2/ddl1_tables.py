@@ -27,101 +27,106 @@ Base = declarative_base()  # Usada para declarar y crear las tablas
 
 # -- Declaración de tablas -- #
 class ServiceZone(Base):
-    __tablename__ = 'Service_Zone'
-    IdService_Zone = Column(Integer, primary_key=True)
-    Service_Zone = Column(String(50))
-    zones = relationship('Zone')
+    __tablename__ = 'service_zone'
+    idservice_zone = Column(Integer, primary_key=True)
+    service_zone = Column(String(50))
+    zones = relationship('zone')
 
 
 class Borough(Base):
-    __tablename__ = 'Borough'
-    IdBorough = Column(Integer, primary_key=True)
-    Borough = Column(String(50))
-    zones = relationship('Zone')
+    __tablename__ = 'borough'
+    idborough = Column(Integer, primary_key=True)
+    borough = Column(String(50))
+    zones = relationship('zone')
 
 
 class Zone(Base):
-    __tablename__ = 'Zone'
-    IdZone = Column(Integer, primary_key=True)
-    Zone = Column(String(80))
-    IdBorough = Column(Integer, ForeignKey('Borough.IdBorough'))
-    IdService_Zone = Column(Integer, ForeignKey('Service_Zone.IdService_Zone'))
-    trips = relationship('Trip')
-    lat = Column(DECIMAL(10,7))
-    lon = Column(DECIMAL(10,7))
+    __tablename__ = 'zone'
+    idzone = Column(Integer, primary_key=True)
+    zone = Column(String(80))
+    idborough = Column(Integer, ForeignKey('borough.idborough'))
+    idservice_zone = Column(Integer, ForeignKey('service_zone.idservice_zone'))
+    trips = relationship('trip')
+
+
 class Vendor(Base):
-    __tablename__ = 'Vendor'
-    IdVendor = Column(Integer, primary_key=True)
-    Vendor = Column(String(80))
-    trips = relationship('Trip')
+    __tablename__ = 'vendor'
+    idvendor = Column(Integer, primary_key=True)
+    vendor = Column(String(80))
+    trips = relationship('trip')
 
 
 class Calendar(Base):
-    __tablename__ = 'Calendar'
-    IdDate = Column(Integer, primary_key=True)
-    Date = Column(Date)
-    Year = Column(Integer)
-    Month = Column(Integer)
-    Day = Column(Integer)
-    Week = Column(Integer)
-    Day_of_Week = Column(String(50))
-    trips = relationship('Trip')
+    __tablename__ = 'calendar'
+    iddate = Column(Integer, primary_key=True)
+    date = Column(Date, index=True)
+    year = Column(Integer, index=True)
+    month = Column(Integer, index=True)
+    day = Column(Integer, index=True)
+    week = Column(Integer)
+    day_of_week = Column(String(50), index=True)
+    trips = relationship('trip')
 
 
 class PrecipType(Base):
-    __tablename__ = 'Precip_Type'
-    IdPrecip_Type = Column(Integer, primary_key=True)
-    Precip_Type = Column(String(50))
-    trips = relationship('Trip')
+    __tablename__ = 'precip_type'
+    idprecip_type = Column(Integer, primary_key=True)
+    precip_type = Column(String(50))
+    trips = relationship('trip')
 
 
 class Trip(Base):
-    __tablename__ = 'Trip'
-    IdTrip = Column(Integer, primary_key=True)
-    IdVendor = Column(Integer, ForeignKey('Vendor.IdVendor'))
-    IdDate = Column(Integer, ForeignKey('Calendar.IdDate'))
-    PU_Time = Column(Time)
-    Duration = Column(Integer)
-    Passenger_Count = Column(Integer)
-    Distance = Column(DECIMAL(5, 2))
-    PU_IdZone = Column(Integer, ForeignKey('Zone.IdZone'))
-    DO_IdZone = Column(Integer, ForeignKey('Zone.IdZone'))
-    Temperature = Column(DECIMAL(4, 2))
-    IdPrecip_Type = Column(Integer, ForeignKey('Precip_Type.IdPrecip_Type'))
-    payments = relationship('Payment', uselist=False)
+    __tablename__ = 'trip'
+    idtrip = Column(Integer, primary_key=True)
+    idvendor = Column(Integer, ForeignKey('vendor.idvendor'))
+    iddate = Column(Integer, ForeignKey('calendar.iddate'))
+    pu_time = Column(Time, index=True)
+    duration = Column(Integer)
+    passenger_count = Column(Integer)
+    distance = Column(DECIMAL(5, 2))
+    pu_idzone = Column(Integer, ForeignKey('zone.idzone'))
+    do_idzone = Column(Integer, ForeignKey('zone.idzone'))
+    temperature = Column(DECIMAL(4, 2), index=True)
+    idprecip_type = Column(Integer, ForeignKey('precip_type.idprecip_type'))
+    payments = relationship('payment', uselist=False)
 
 
 class RateCode(Base):
-    __tablename__ = 'Rate_Code'
-    IdRate_Code = Column(Integer, primary_key=True)
-    Rate_Code = Column(String(50))
-    payments = relationship('Payment')
+    __tablename__ = 'rate_code'
+    idrate_code = Column(Integer, primary_key=True)
+    rate_code = Column(String(50))
+    payments = relationship('payment')
 
 
 class PaymentType(Base):
-    __tablename__ = 'Payment_Type'
-    IdPayment_Type = Column(Integer, primary_key=True)
-    Payment_Type = Column(String(50))
-    payments = relationship('Payment')
+    __tablename__ = 'payment_type'
+    idpayment_type = Column(Integer, primary_key=True)
+    payment_type = Column(String(50))
+    payments = relationship('payment')
 
 
 class Payment(Base):
-    __tablename__ = 'Payment'
-    IdPayment = Column(Integer, primary_key=True)
-    IdTrip = Column(Integer, ForeignKey('Trip.IdTrip'))
-    IdRate_Code = Column(Integer, ForeignKey('Rate_Code.IdRate_Code'))
-    IdPayment_Type = Column(Integer, ForeignKey('Payment_Type.IdPayment_Type'))
-    Fare_Amount = Column(DECIMAL(6, 2))
-    Extra = Column(DECIMAL(4, 2))
-    MTA_Tax = Column(DECIMAL(4, 2))
-    Improvement_Surcharge = Column(DECIMAL(4, 2))
-    Tolls_Amount = Column(DECIMAL(5, 2))
-    Total_Amount = Column(DECIMAL(6, 2))
-    trips = relationship('Trip')
+    __tablename__ = 'payment'
+    idpayment = Column(Integer, primary_key=True)
+    idtrip = Column(Integer, ForeignKey('trip.idtrip'))
+    idrate_code = Column(Integer, ForeignKey('rate_code.idrate_code'))
+    idpayment_type = Column(Integer, ForeignKey('payment_type.idpayment_type'))
+    fare_amount = Column(DECIMAL(6, 2))
+    extra = Column(DECIMAL(4, 2))
+    mta_tax = Column(DECIMAL(4, 2))
+    improvement_surcharge = Column(DECIMAL(4, 2))
+    tolls_amount = Column(DECIMAL(5, 2))
+    total_amount = Column(DECIMAL(6, 2), index=True)
+    trips = relationship('trip')
+
+
+class Outlier(Base):
+    __tablename__ = 'aux_outlier'
+    idrecord = Column(Integer, primary_key=True)
 
 
 # -- Creación de tablas en la DB -- #
 Base.metadata.create_all(engine)
 
-#Cerramos la conexión
+# Cerramos la conexión
 engine.dispose()

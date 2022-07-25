@@ -6,7 +6,10 @@
 /virtual-env
 /week-2/TiempoEjecucion.csv
 /week-2/tiempoExec.ipynb
-getGeolocation.ipynb
+/week-2/TiempoGlobal.csv
+/week-2/prob.ipynb
+/vistas
+LinearRegressionTest.ipynb
 
 .idea
 week-2/data

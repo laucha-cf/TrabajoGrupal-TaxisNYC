@@ -1,12 +1,25 @@
-import pandas as pd
+import os
+import fnmatch
 import datetime as dt
 
+import pandas as pd
+
+# Definimos el path de la carpeta que contiene la data.
+DATA_PATH = '../data/'
+
+# Extraemos el filename y la estampa del mes de la data a cargar.
+df_filename = fnmatch.filter(os.listdir(DATA_PATH), 'yellow_tripdata*.parquet')[0]
+month_stamp = df_filename[16:23]
+
 # Cargamos los datos
-df = pd.read_parquet('../data/yellow_tripdata_2018-01.parquet')
+df = pd.read_parquet(DATA_PATH + df_filename)
 
 # Hacemos una copia para trabajar con los datos y para evitar que en un error afecte los datos originales
-df1 = df.copy()  
+df1 = df.copy()
 
+# - Reindexamos el df agregando la estampa del mes.
+stamp_id = int(month_stamp.replace('-','') + '00000000')
+df1.index += stamp_id
 # - VendorId sólo acepta 1 o 2, si se da algo fuera de esto se imputa por la moda.
 supported_values = [1, 2]  # creamos una variable con los valores admitidos
 mode_vendor = int(df1['VendorID'].mode())   # la moda de la columna
@@ -149,9 +162,9 @@ df1.loc[(df1['mta_tax'].isna()), 'Outlier'] = 1
 df1.loc[(df1['trip_distance'] == 0), 'Outlier'] = 1
 df1.loc[(df1['fare_amount'] <= 0), 'Outlier'] = 1
 df1.loc[(df1['improvement_surcharge'].isna()), 'Outlier'] = 1
-df1.loc[((df1['PULocationID'] == 265) & (df1['DOLocationID'] == 265)), 'Outlier'] = 1
+df1.loc[((df1['PULocationID'] == 265) | (df1['DOLocationID'] == 265)), 'Outlier'] = 1
 
 df_outliers = df1.loc[df1['Outlier'] == 1]
 
-df_outliers.to_csv('../processed_data/outliers.csv')
-df1.to_csv('../processed_data/data_taxis_nyc_2018.csv', index=False)
+df_outliers.to_csv(f'../processed_data/outliers_{month_stamp}.csv')
+df1.to_csv(f'../processed_data/data_taxis_nyc_{month_stamp}.csv')

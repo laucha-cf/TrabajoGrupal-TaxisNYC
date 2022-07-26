@@ -2,7 +2,7 @@ import time
 import datetime as dt
 import pandas as pd
 
-#-- Pipeline --#
+# -- Pipeline --#
 if __name__ == '__main__':
     start = time.time()
     print('Extrayendo Data del Bucket (Extract.py)...')
@@ -11,8 +11,8 @@ if __name__ == '__main__':
     print('Limpiando Datos (DataCleaning.py)...')
     exec(open('DataCleaning.py').read())
     
-    #print('Moviendo datos ya procesados (s3move.py)...')
-    #exec(open('s3move.py').read())
+    # print('Moviendo datos ya procesados (s3move.py)...')
+    # exec(open('s3move.py').read())
     
     print('Creación de la Base de Datos (ddl1_tables.py)...')
     exec(open('ddl1_tables.py').read())

@@ -1,21 +1,32 @@
+import os
+import fnmatch
+import json
+from io import StringIO
 
 import pandas as pd
 import numpy as np
-import requests
-import json
 import boto3
-from io import StringIO
 
-# -- Cargamos los datos de las zonas dentro de Nueva York --#
-df_all_zones = pd.read_csv('../data/taxi+_zone_lookup.csv')
-# -- Cargamos los datos de los viajes en taxi. Datos previamente procesados, así como los outliers --#
-df_all = pd.read_csv('../processed_data/data_taxis_nyc_2018.csv', parse_dates=['tpep_pickup_datetime'])
-df_outliers = pd.read_csv('../processed_data/outliers.csv')
+# Definimos los paths de la carpetas que contienen la data.
+DATA_PATH = '../data/'
+DATA_PATH_2 = '../processed_data/'
+
+zones_filename = fnmatch.filter(os.listdir(DATA_PATH), 'taxi+_zone*.csv')[0]
+weather_filename = fnmatch.filter(os.listdir(DATA_PATH), 'NY_Boroughs_Weathers*.csv')[0]
+
+taxis_filename = fnmatch.filter(os.listdir(DATA_PATH_2), 'data_taxis_nyc*.csv')[0]
+outliers_filename = fnmatch.filter(os.listdir(DATA_PATH_2), 'outliers*.csv')[0]
+month_stamp = outliers_filename[9: 16]
+
+# -- Cargamos todos los dataframes --#
+df_all_zones = pd.read_csv(DATA_PATH + zones_filename)
+df_weather = pd.read_csv(DATA_PATH + weather_filename, parse_dates=['Datetime'])
+
+df_all = pd.read_csv(DATA_PATH_2 + taxis_filename, parse_dates=['tpep_pickup_datetime'])
+df_outliers = pd.read_csv(DATA_PATH_2 + outliers_filename)
+
 # -- Creamos una copia del DataFrame para no afectar el original --#
 df = df_all.copy()
-
-# -- Cargamos los datos del clima para cada Borough --#
-df_weather = pd.read_csv('../data/NY_Boroughs_Weathers_01-2018.csv', parse_dates=['Datetime'])
 
 # -- Agregamos info del clima al DataFrame de viajes --#
 bors = df_all_zones.Borough.unique()
@@ -77,6 +88,7 @@ def replace_bor_for_index(p_x):
         if bor == p_x:
             return df_borough.iloc[j]['BoroughID']
 
+
 def replace_zone_for_index(p_x):
     """
     Retorna el índice correspondiente a la Service Zone.
@@ -116,7 +128,7 @@ only_dates = df['tpep_pickup_datetime'].str.split()
 
 for i, elem in enumerate(only_dates):
     only_dates[i] = elem[0]
-    
+
 unique_dates = list(only_dates.unique())
 
 df_calendar = pd.DataFrame({
@@ -129,7 +141,7 @@ df_calendar['Year'] = df_calendar['Date'].dt.year
 df_calendar['Month'] = df_calendar['Date'].dt.month
 df_calendar['Day'] = df_calendar['Date'].dt.day
 df_calendar['Week'] = df_calendar['Date'].dt.isocalendar().week
-df_calendar['Day_of_Week'] = df_calendar['Date'].dt.day_name
+df_calendar['Day_of_Week'] = df_calendar['Date'].dt.day_name()
 
 # -- Trip --#
 datetime = df['tpep_pickup_datetime'].str.split()
@@ -140,6 +152,7 @@ for date, time in datetime:
     times.append(time)
 
 df_trip = pd.DataFrame({
+    'IdTrip': df['Unnamed: 0'],
     'VendorID': df['VendorID'],
     'Date': dates,
     'PU_Time': times,
@@ -147,7 +160,7 @@ df_trip = pd.DataFrame({
     'Passenger_count': df['passenger_count'],
     'Distance': df['trip_distance'],
     'PU_IdZone': df['PULocationID'],
-    'DO_IdZone': df['DOLocationID'], 
+    'DO_IdZone': df['DOLocationID'],
     'Temperature': df['Temperature'],
     'Precip_Type': df['Precip_Type']
 })
@@ -156,14 +169,13 @@ df_trip.Date = pd.to_datetime(df_trip.Date)
 df_trip.Date = df_trip.Date.dt.strftime('%Y%m%d')
 df_trip.Duration = df_trip.Duration.round()
 df_trip.Precip_Type = df_trip.Precip_Type.round()
-df_trip.insert(loc=0, column='IdTrip', value=np.arange(len(df_trip)))
 
 # -- Payment --#
 df_payment = df[['RatecodeID', 'payment_type', 'fare_amount', 'extra', 'mta_tax',
                  'improvement_surcharge', 'tolls_amount', 'total_amount']]
 
 df_payment.insert(loc=0, column='IdTrip', value=df_trip['IdTrip'])
-df_payment.insert(loc=0, column='IdPayment', value=np.arange(len(df_payment)))
+df_payment.insert(loc=0, column='IdPayment', value=df_trip['IdTrip'])
 
 # -- Outlier -- #
 df_outliers = df_outliers[['Unnamed: 0']]
@@ -181,7 +193,7 @@ df_borough.columns = ['idborough', 'borough']
 df_service_zone.columns = ['idservice_zone', 'service_zone']
 
 df_trip.columns = ['idtrip', 'idvendor', 'iddate', 'pu_time', 'duration', 'passenger_count',
-                    'distance', 'pu_idzone', 'do_idzone', 'temperature', 'idprecip_type']
+                   'distance', 'pu_idzone', 'do_idzone', 'temperature', 'idprecip_type']
 
 df_precip_type.columns = ['idprecip_type', 'precip_type']
 
@@ -192,49 +204,23 @@ df_payment_type.columns = ['idpayment_type', 'payment_type']
 df_zone.columns = ['idzone', 'zone', 'idborough', 'idservice_zone']
 
 df_payment.columns = ['idpayment', 'idtrip', 'idrate_code', 'idpayment_type', 'fare_amount',
-                    'extra', 'mta_tax', 'improvement_surcharge', 'tolls_amount', 'total_amount']
+                      'extra', 'mta_tax', 'improvement_surcharge', 'tolls_amount', 'total_amount']
 
 df_outliers.columns = ['idrecord']
 
-# Por ahora comento estas líneas ya que al parecer no van a ser usadas, dependiendo de como siga la semana se borra todo este bloque.
-# Agregamos Latitud y Longitud
-# def latitudYlongitud():
-#     '''Agrega la Latitud y Longitud al DataFrame de Zones de la ubicación geográfica'''
-#     df = pd.merge(df_zone, df_borough, on='IdBorough')
-#     latitudes = []
-#     longitudes = []
-#     for i, row in df.iterrows():
-#         address = row['Zone'] +','+ row['Borough']
-#         parameters = {
-#             'key': 'OeOx3nK0ZLtQni4idyeJBoRdXp6Wiqqx',
-#             'location': address
-#         }
-#         res = requests.get('http://www.mapquestapi.com/geocoding/v1/address', params=parameters)
-#         data = json.loads(res.text)['results'][0]['locations'][0]
-#         lat = data['latLng']['lat']
-#         lon = data['latLng']['lng']
-#         latitudes.append(lat)
-#         longitudes.append(lon)
-        
-#     df = df.drop(columns=['Borough'])
-#     df['lat'] = latitudes
-#     df['lon'] = longitudes
-#     return df
-
-# df_zone = latitudYlongitud()
-
 # -- Exportar a archivos CSV --#
 df_vendor.to_csv('../tables/vendor.csv', index=False)
-df_calendar.to_csv('../tables/calendar.csv', index=False)
 df_borough.to_csv('../tables/borough.csv', index=False)
 df_service_zone.to_csv('../tables/service_zone.csv', index=False)
-df_trip.to_csv('../tables/trip.csv', index=False)
 df_precip_type.to_csv('../tables/precip_type.csv', index=False)
 df_rate_code.to_csv('../tables/rate_code.csv', index=False)
 df_payment_type.to_csv('../tables/payment_type.csv', index=False)
 df_zone.to_csv('../tables/zone.csv', index=False)
-df_payment.to_csv('../tables/payment.csv', index=False)
-df_outliers.to_csv('../tables/outlier.csv', index=False)
+# Marcamos con la estampa del mes a las tablas que soportan carga incremental.
+df_payment.to_csv(f'../tables/payment_{month_stamp}.csv', index=False)
+df_outliers.to_csv(f'../tables/outlier_{month_stamp}.csv', index=False)
+df_trip.to_csv(f'../tables/trip_{month_stamp}.csv', index=False)
+df_calendar.to_csv(f'../tables/calendar_{month_stamp}.csv', index=False)
 
 # Se instancia la sesión con las credenciales de acceso para la conexión a S3 para carga de tablas al data lake.
 #sesion = boto3.session.Session(
@@ -263,4 +249,3 @@ df_outliers.to_csv('../tables/outlier.csv', index=False)
 #    csv_buffer = StringIO()
 #    df.to_csv(csv_buffer, index=False)
 #    connection.Object(bucket,f'processed_data/tables/{lista_nombres[i]}.csv').put(Body=csv_buffer.getvalue())
-

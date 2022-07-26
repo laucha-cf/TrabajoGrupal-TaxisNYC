@@ -1,18 +1,21 @@
 import io
 import os
+import fnmatch
 
 import pandas as pd
-from sqlalchemy import create_engine, inspect, MetaData
+from sqlalchemy import create_engine, MetaData
 import time
 
 # -- CONSTANTES -- #
+DATA_PATH = '../tables/'
+
 DBMS = 'postgresql'
 DRIVER = 'psycopg2'
 USER = 'postgres'
-PASSWORD = 'shakejunt02'
+PASSWORD = '4217796'
 HOST = 'localhost'
 PORT = '5432'
-DB_NAME = 'G9'
+DB_NAME = 'nyc_taxis'
 
 # crea la conexión a la base de datos, primero crea un engine que es basicamente una instancia de la base de datos
 # cuando ya está instanciada se crea la conexión a la base de datos
@@ -22,21 +25,26 @@ engine = create_engine(f'{DBMS}+{DRIVER}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB_N
 connection = engine.connect()
 metadata = MetaData()
 
-# inspect devuelve un objeto, en este caso se usa para ver un listado de las tablas de la DB y comprobar la conexión
-insp = inspect(engine)
-
 # Se levantan los dataframes correspondientes a cada tabla
-Trip_df = pd.read_csv('../tables/trip.csv', dtype={'duration': int})
-Payment_df = pd.read_csv('../tables/payment.csv')
-Vendor_df = pd.read_csv('../tables/vendor.csv')
-Borough_df = pd.read_csv('../tables/borough.csv')
-Service_Zone_df = pd.read_csv('../tables/service_zone.csv')
-Precip_Type_df = pd.read_csv('../tables/precip_type.csv')
-Rate_Code_df = pd.read_csv('../tables/rate_code.csv')
-Payment_Type_df = pd.read_csv('../tables/payment_type.csv')
-Calendar_df = pd.read_csv('../tables/calendar.csv')
-Zone_df = pd.read_csv('../tables/zone.csv')
-Outlier_df = pd.read_csv('../tables/outlier.csv')
+Vendor_df = pd.read_csv(DATA_PATH + 'vendor.csv')
+Borough_df = pd.read_csv(DATA_PATH + 'borough.csv')
+Service_Zone_df = pd.read_csv(DATA_PATH + 'service_zone.csv')
+Precip_Type_df = pd.read_csv(DATA_PATH + 'precip_type.csv')
+Rate_Code_df = pd.read_csv(DATA_PATH + 'rate_code.csv')
+Payment_Type_df = pd.read_csv(DATA_PATH + 'payment_type.csv')
+Zone_df = pd.read_csv(DATA_PATH + 'zone.csv')
+# Seguimos con las tablas que soportan carga incremental.
+outlier_filename = fnmatch.filter(os.listdir(DATA_PATH), 'outlier_*.csv')[0]
+Outlier_df = pd.read_csv(DATA_PATH + outlier_filename)
+
+calendar_filename = fnmatch.filter(os.listdir(DATA_PATH), 'calendar_*.csv')[0]
+Calendar_df = pd.read_csv(DATA_PATH + calendar_filename)
+
+trip_filename = fnmatch.filter(os.listdir(DATA_PATH), 'trip_*.csv')[0]
+Trip_df = pd.read_csv(DATA_PATH + trip_filename, dtype={'duration': int})
+
+payment_filename = fnmatch.filter(os.listdir(DATA_PATH), 'payment_*.csv')[0]
+Payment_df = pd.read_csv(DATA_PATH + payment_filename)
 
 # Carga los contenidos de los dataframes en las tablas correspondientes en la DB, se recomienda ejecutar uno por uno.
 # Para las tablas con mayor número de registros se recomienda trabajar con el parametro chunksize

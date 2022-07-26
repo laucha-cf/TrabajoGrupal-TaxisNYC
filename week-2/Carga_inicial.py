@@ -113,9 +113,12 @@ for i, name in enumerate(tables_names):
     else:      
         fill_table(name, dataframes[i])
 
-
 # Anotamos los tiempos de carga
 df_times['Start'] = start_tms
 df_times['Stop'] = end_tms
 df_times['RunTime'] = df_times['Stop'] - df_times['Start']
 df_times.to_csv('TiempoEjecucion.csv')
+
+# Cerramos las conexiones
+connection.close()
+engine.dispose()

@@ -18,7 +18,7 @@ df = pd.read_parquet(DATA_PATH + df_filename)
 df1 = df.copy()
 
 # - Reindexamos el df agregando la estampa del mes.
-stamp_id = int(month_stamp.replace('-','') + '00000000')
+stamp_id = int(month_stamp.replace('-', '') + '00000000')
 df1.index += stamp_id
 # - VendorId sólo acepta 1 o 2, si se da algo fuera de esto se imputa por la moda.
 supported_values = [1, 2]  # creamos una variable con los valores admitidos
@@ -166,5 +166,6 @@ df1.loc[((df1['PULocationID'] == 265) | (df1['DOLocationID'] == 265)), 'Outlier'
 
 df_outliers = df1.loc[df1['Outlier'] == 1]
 
+# Guardamos los DFs como CSVs.
 df_outliers.to_csv(f'../processed_data/outliers_{month_stamp}.csv')
 df1.to_csv(f'../processed_data/data_taxis_nyc_{month_stamp}.csv')

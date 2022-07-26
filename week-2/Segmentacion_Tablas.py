@@ -11,7 +11,6 @@ import boto3
 DATA_PATH = '../data/'
 DATA_PATH_2 = '../processed_data/'
 
-zones_filename = fnmatch.filter(os.listdir(DATA_PATH), 'taxi+_zone*.csv')[0]
 weather_filename = fnmatch.filter(os.listdir(DATA_PATH), 'NY_Boroughs_Weathers*.csv')[0]
 
 taxis_filename = fnmatch.filter(os.listdir(DATA_PATH_2), 'data_taxis_nyc*.csv')[0]
@@ -19,7 +18,7 @@ outliers_filename = fnmatch.filter(os.listdir(DATA_PATH_2), 'outliers*.csv')[0]
 month_stamp = outliers_filename[9: 16]
 
 # -- Cargamos todos los dataframes --#
-df_all_zones = pd.read_csv(DATA_PATH + zones_filename)
+df_all_zones = pd.read_csv(DATA_PATH + 'taxi+_zone_lookup.csv')
 df_weather = pd.read_csv(DATA_PATH + weather_filename, parse_dates=['Datetime'])
 
 df_all = pd.read_csv(DATA_PATH_2 + taxis_filename, parse_dates=['tpep_pickup_datetime'])

@@ -1,18 +1,21 @@
 import io
 import os
+import fnmatch
 
 import pandas as pd
-from sqlalchemy import create_engine, inspect, MetaData
+from sqlalchemy import create_engine, MetaData
 import time
 
 # -- CONSTANTES -- #
+DATA_PATH = '../tables/carga_incremental/'
+
 DBMS = 'postgresql'
 DRIVER = 'psycopg2'
-USER = os.environ.get('DB_USERNAME')
-PASSWORD = os.environ.get('DB_PASSWORD')
-HOST = os.environ.get('DB_ENDPOINT')
+USER = 'postgres'
+PASSWORD = '4217796'
+HOST = 'localhost'
 PORT = '5432'
-DB_NAME = os.environ.get('DB_NAME')
+DB_NAME = 'nyc_taxis'
 
 # crea la conexión a la base de datos, primero crea un engine que es basicamente una instancia de la base de datos
 # cuando ya está instanciada se crea la conexión a la base de datos
@@ -22,19 +25,23 @@ engine = create_engine(f'{DBMS}+{DRIVER}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB_N
 connection = engine.connect()
 metadata = MetaData()
 
-# inspect devuelve un objeto, en este caso se usa para ver un listado de las tablas de la DB y comprobar la conexión
-insp = inspect(engine)
-
 # Se levantan los dataframes correspondientes a cada tabla
-Trip_df = pd.read_csv('../tables/trip_i.csv', dtype={'duration': int})
-Payment_df = pd.read_csv('../tables/payment_i.csv')
-Calendar_df = pd.read_csv('../tables/calendar_i.csv')
-Outlier_df = pd.read_csv('../tables/outlier_i.csv')
+calendar_filename = fnmatch.filter(os.listdir(DATA_PATH), 'calendar_*.csv')[0]
+Calendar_df = pd.read_csv(DATA_PATH + calendar_filename)
+
+trip_filename = fnmatch.filter(os.listdir(DATA_PATH), 'trip_*.csv')[0]
+Trip_df = pd.read_csv(DATA_PATH + trip_filename, dtype={'duration': int})
+
+payment_filename = fnmatch.filter(os.listdir(DATA_PATH), 'payment_*.csv')[0]
+Payment_df = pd.read_csv(DATA_PATH + payment_filename)
+
+outlier_filename = fnmatch.filter(os.listdir(DATA_PATH), 'outlier_*.csv')[0]
+Outlier_df = pd.read_csv(DATA_PATH + outlier_filename)
 
 # Carga los contenidos de los dataframes en las tablas correspondientes en la DB, se recomienda ejecutar uno por uno.
 # Para las tablas con mayor número de registros se recomienda trabajar con el parametro chunksize
-dataframes = [Trip_df, Payment_df, Outlier_df]
-tables_names = ['trip', 'payment', 'aux_outlier']
+dataframes = [Calendar_df, Trip_df, Payment_df, Outlier_df]
+tables_names = ['calendar', 'trip', 'payment', 'aux_outlier']
 df_times = pd.DataFrame({'tables': tables_names})
 start_tms = []
 end_tms = []
@@ -96,12 +103,23 @@ for i, name in enumerate(tables_names):
     else:      
         fill_table(name, dataframes[i])
 
-#Cerramos la conexión y la sesión con la base de datos
-connection.close()
-engine.dispose()
+# Poblamos todas las tablas
+for i, name in enumerate(tables_names):
+    if name == 'trip':
+        Trip_df.loc[(Trip_df['idprecip_type'].isna()), 'idprecip_type'] = 0
+        Trip_df.idprecip_type = [*map(round, Trip_df.idprecip_type)]
+        sql_copy_opt(Trip_df, name, engine)
+    elif name == 'payment':
+        sql_copy_opt(Payment_df, name, engine)
+    else:
+        fill_table(name, dataframes[i])
 
 # Anotamos los tiempos de carga
 df_times['Start'] = start_tms
 df_times['Stop'] = end_tms
 df_times['RunTime'] = df_times['Stop'] - df_times['Start']
 df_times.to_csv('TiempoEjecucion.csv')
+
+# Cerramos las conexiones
+connection.close()
+engine.dispose()

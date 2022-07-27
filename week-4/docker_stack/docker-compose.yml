@@ -1,30 +1,6 @@
 version: "3"
 services:
 
-    # scheduler & monitoring service
-    airflow-webserver:
-        hostname: myairflow
-        container_name: airflow_container
-        image: 'puckel/docker-airflow:latest'
-        ports:
-            - '8085:8080'
-        networks:
-            - dataworld
-        volumes:
-            - airflow-data:/usr/local/airflow/data
-            - ./airflow/logs:/usr/local/airflow/logs
-            - ./airflow/dags:/usr/local/airflow/dags
-            - ./airflow/requirements/requirements.txt:/requirements.txt
-            - ./airflow/airflow.cfg:/usr/local/airflow/airflow.cfg
-        environment:
-            - GUNICORN_CMD_ARGS=--log-level warning
-        restart: on-failure
-        healthcheck:
-            test: ["CMD", "curl", "-f", "http://myairflow:8080/admin/"]
-            interval: 30s
-            timeout: 20s
-            retries: 3
-
     # relational database
     postgres:
         hostname: mypostgres
@@ -95,7 +71,6 @@ services:
             - 9009:9000
 
 volumes:
-    airflow-data:
     postgres:
     pgadmin:
     portainer-data:

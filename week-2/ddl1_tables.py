@@ -8,10 +8,10 @@ from sqlalchemy_utils import database_exists, create_database
 #  -- CONSTANTES -- #
 DBMS = 'postgresql'
 USER = 'postgres'
-PASSWORD = '4217796'
-HOST = 'localhost'
+PASSWORD = 'postgres'
+HOST = '192.168.80.253'
 PORT = '5432'
-DB_NAME = 'nyc_taxis'
+DB_NAME = ' G9'
 
 # -- Creación del engine y de la db -- #
 engine = create_engine(f'{DBMS}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}')

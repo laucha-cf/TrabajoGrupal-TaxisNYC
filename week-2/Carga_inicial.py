@@ -12,10 +12,10 @@ DATA_PATH = '../tables/'
 DBMS = 'postgresql'
 DRIVER = 'psycopg2'
 USER = 'postgres'
-PASSWORD = '4217796'
-HOST = 'localhost'
+PASSWORD = 'postgres'
+HOST = '192.168.80.253'
 PORT = '5432'
-DB_NAME = 'nyc_taxis'
+DB_NAME = 'G9'
 
 # crea la conexión a la base de datos, primero crea un engine que es basicamente una instancia de la base de datos
 # cuando ya está instanciada se crea la conexión a la base de datos

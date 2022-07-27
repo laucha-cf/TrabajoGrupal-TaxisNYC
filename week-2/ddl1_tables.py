@@ -1,7 +1,7 @@
 # -- Librerías usadas -- #
 import os
 
-from sqlalchemy import create_engine, Column, ForeignKey, Integer, DECIMAL, String, Date, Time
+from sqlalchemy import create_engine, Column, ForeignKey, Integer, DECIMAL, String, Date, Time, BIGINT
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 from sqlalchemy_utils import database_exists, create_database
 
@@ -11,7 +11,7 @@ USER = 'postgres'
 PASSWORD = 'postgres'
 HOST = '192.168.80.253'
 PORT = '5432'
-DB_NAME = 'G9'
+DB_NAME = ' G9'
 
 # -- Creación del engine y de la db -- #
 engine = create_engine(f'{DBMS}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DB_NAME}')
@@ -77,16 +77,16 @@ class PrecipType(Base):
 
 class Trip(Base):
     __tablename__ = 'trip'
-    idtrip = Column(Integer, primary_key=True)
-    idvendor = Column(Integer, ForeignKey('vendor.idvendor'))
+    idtrip = Column(BIGINT, primary_key=True)
+    idvendor = Column(BIGINT, ForeignKey('vendor.idvendor'))
     iddate = Column(Integer, ForeignKey('calendar.iddate'))
-    pu_time = Column(Time, index=True)
+    pu_time = Column(Time)
     duration = Column(Integer)
     passenger_count = Column(Integer)
     distance = Column(DECIMAL(5, 2))
     pu_idzone = Column(Integer, ForeignKey('zone.idzone'))
     do_idzone = Column(Integer, ForeignKey('zone.idzone'))
-    temperature = Column(DECIMAL(4, 2), index=True)
+    temperature = Column(DECIMAL(4, 2))
     idprecip_type = Column(Integer, ForeignKey('precip_type.idprecip_type'))
     payments = relationship('payment', uselist=False)
 
@@ -107,8 +107,8 @@ class PaymentType(Base):
 
 class Payment(Base):
     __tablename__ = 'payment'
-    idpayment = Column(Integer, primary_key=True)
-    idtrip = Column(Integer, ForeignKey('trip.idtrip'))
+    idpayment = Column(BIGINT, primary_key=True)
+    idtrip = Column(BIGINT, ForeignKey('trip.idtrip'))
     idrate_code = Column(Integer, ForeignKey('rate_code.idrate_code'))
     idpayment_type = Column(Integer, ForeignKey('payment_type.idpayment_type'))
     fare_amount = Column(DECIMAL(6, 2))
@@ -122,7 +122,7 @@ class Payment(Base):
 
 class Outlier(Base):
     __tablename__ = 'aux_outlier'
-    idrecord = Column(Integer, primary_key=True)
+    idrecord = Column(BIGINT, primary_key=True)
 
 
 # -- Creación de tablas en la DB -- #

@@ -18,3 +18,10 @@ week-2/.idea
 week-2/tables
 week-2/RDS_connect_final.ipynb
 week-2/Extract.ipynb
+week-3/carga_incremental.ipynb
+week-3/carga_incremental.py
+week-3/.ipynb_checkpoints
+week-3/carga_inicial.ipynb
+week-3/Data_cleaning.ipynb
+week-3/Segmentacion_Tablas.ipynb
+week-3/TiempoEjecucion.csv

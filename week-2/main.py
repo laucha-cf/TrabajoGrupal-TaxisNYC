@@ -4,7 +4,6 @@ import pandas as pd
 
 #-- Pipeline --#
 if __name__ == '__main__':
-    start = time.time()
     print('Extrayendo Data del Bucket (Extract.py)...')
     exec(open('Extract.py').read())
     
@@ -22,9 +21,3 @@ if __name__ == '__main__':
     
     print('Cargamos la data a la Base de Datos (Carga_inicial.py)...')
     exec(open('Carga_inicial.py').read())
-    stop = time.time()
-    df = pd.DataFrame({
-        'Fecha': [dt.date.today()],
-        'Tiempo_Mins': [(stop-start)/60]
-    })
-    df.to_csv('TiempoGlobal.csv', index=False)

@@ -8,8 +8,8 @@ from sqlalchemy_utils import database_exists, create_database
 #  -- CONSTANTES -- #
 DBMS = 'postgresql'
 USER = 'postgres'
-PASSWORD = 'shakejunt02'
-HOST = 'localhost'
+PASSWORD = 'postgres'
+HOST = '192.168.80.253'
 PORT = '5432'
 DB_NAME = 'G9'
 

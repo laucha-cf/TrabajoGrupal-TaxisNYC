@@ -9,8 +9,8 @@ import time
 DBMS = 'postgresql'
 DRIVER = 'psycopg2'
 USER = 'postgres'
-PASSWORD = 'shakejunt02'
-HOST = 'localhost'
+PASSWORD = 'postgres'
+HOST = '192.168.80.253'
 PORT = '5432'
 DB_NAME = 'G9'
 

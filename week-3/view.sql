@@ -1,5 +1,5 @@
 CREATE OR REPLACE VIEW pbi_query AS
-    SELECT t.idtrip, t.idvendor, c.date, c.day, c.day_of_week, EXTRACT(HOUR FROM t.pu_time) as hour, pu.zone as pickup_zone, pu.borough as pickup_borough,
+    SELECT t.idtrip, t.idvendor, c.date, c.day, c.day_of_week, EXTRACT(isodow FROM c.date)-1 as dow_number, EXTRACT(HOUR FROM t.pu_time) as hour, pu.zone as pickup_zone, pu.borough as pickup_borough,
             doz.zone as dropoff_zone, doz.borough as dropoff_borough, t.duration, t.distance, t.temperature, pt.precip_type, p.idrate_code, p.idpayment_type, p.total_amount
     FROM (
         SELECT * FROM trip

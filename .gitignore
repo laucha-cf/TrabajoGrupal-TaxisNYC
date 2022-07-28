@@ -8,6 +8,7 @@
 /week-2/tiempoExec.ipynb
 /week-2/TiempoGlobal.csv
 /week-2/prob.ipynb
+/week-2/__pycache__/
 /vistas
 LinearRegressionTest.ipynb
 
@@ -25,3 +26,5 @@ week-3/carga_inicial.ipynb
 week-3/Data_cleaning.ipynb
 week-3/Segmentacion_Tablas.ipynb
 week-3/TiempoEjecucion.csv
+
+venv/

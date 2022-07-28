@@ -10,7 +10,7 @@ DBMS = 'postgresql'
 DRIVER = 'psycopg2'
 USER = 'postgres'
 PASSWORD = 'postgres'
-HOST = '172.24.230.154'
+HOST = 'localhost'
 PORT = '5432'
 DB_NAME = 'G9'
 

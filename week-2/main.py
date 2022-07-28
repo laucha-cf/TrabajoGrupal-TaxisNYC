@@ -23,4 +23,4 @@ if __name__ == '__main__':
     tables = transform(df_trip_clean, df_outlier, df_zones, df_weather)
     load(tables, DBMS, DRIVER, USER, PASSWORD, HOST, PORT, DB_NAME)
     move()
-    
+  

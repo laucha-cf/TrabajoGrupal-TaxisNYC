@@ -9,7 +9,7 @@ DBMS = 'postgresql'
 DRIVER = 'psycopg2'
 USER = 'postgres'
 PASSWORD = 'postgres'
-HOST = '172.24.230.154'
+HOST = 'localhost'
 PORT = '5432'
 DB_NAME = 'G9'
 
@@ -20,4 +20,4 @@ if __name__ == '__main__':
     df_trip_clean, df_outlier = cleaning(df_trips, stamp)
     tables = transform(df_trip_clean, df_outlier, df_zones, df_weather)
     load(tables, DBMS, DRIVER, USER, PASSWORD, HOST, PORT, DB_NAME)
-    # move()
+    move()
